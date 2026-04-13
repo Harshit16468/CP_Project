@@ -89,8 +89,8 @@ bayesian:
   min_rt_ms: 100
   max_rt_ms: 3000
   # PyMC sampler settings
-  draws: 2000
-  tune: 1000
-  chains: 4
+  draws: 500
+  tune: 500
+  chains: 2
   target_accept: 0.9
   random_seed: 42
