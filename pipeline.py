@@ -184,10 +184,14 @@ def step4_attention(
         corr_df.to_csv(out_csv, index=False)
         logger.info("Saved attention correlations to %s", out_csv)
 
-        analyzer.plot_top_heads(
-            k=10,
-            save_path=figures_dir / f"04_top_heads_{model_label}.png",
-        )
+        if not corr_df.empty:
+            analyzer.plot_top_heads(
+                k=10,
+                save_path=figures_dir / f"04_top_heads_{model_label}.png",
+            )
+        else:
+            logger.warning("Skipping plot — no attention correlations collected "
+                           "(dep_length column missing? run step 5 first).")
         results[model_label] = corr_df
 
     return results
@@ -364,23 +368,21 @@ def main() -> None:
         if cache.exists():
             df = pd.read_parquet(cache)
 
-    # ── Step 4: Attention analysis ───────────────────────────────────────────
-    # Requires integration_cost (step 5) for the correlation, so we allow
-    # running 4 after 5 by loading step-5 cache.
-    if 4 in steps:
-        dep_df = df
-        cache5 = cache_path(cfg, "05_integration_cost.parquet")
-        if "dep_length" not in df.columns and cache5.exists():
-            dep_df = pd.read_parquet(cache5)
-        step4_attention(cfg, dep_df)
-
-    # ── Step 5: Integration cost ─────────────────────────────────────────────
+    # ── Step 5: Integration cost (runs before step 4 — 4 needs dep_length) ───
     if 5 in steps:
         df = step5_integration_cost(cfg, df)
     else:
         cache = cache_path(cfg, "05_integration_cost.parquet")
         if cache.exists():
             df = pd.read_parquet(cache)
+
+    # ── Step 4: Attention analysis (needs dep_length from step 5) ────────────
+    if 4 in steps:
+        if "dep_length" not in df.columns:
+            logger.warning("dep_length not in DataFrame — run step 5 first. "
+                           "Skipping attention analysis.")
+        else:
+            step4_attention(cfg, df)
 
     # ── Step 6: Bayesian modeling ────────────────────────────────────────────
     if 6 in steps:
