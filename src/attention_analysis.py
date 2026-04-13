@@ -176,7 +176,7 @@ class AttentionAnalyzer:
             raise RuntimeError("Call run() first.")
 
         top = self._results.head(k).copy()
-        top["label"] = top.apply(lambda r: f"L{int(r.layer)}H{int(r.head)}", axis=1)
+        top["label"] = top.apply(lambda r: f"L{int(r['layer'])}H{int(r['head'])}", axis=1)
 
         fig, ax = plt.subplots(figsize=(8, 4))
         colors = ["steelblue" if r > 0 else "tomato" for r in top["rho"]]
