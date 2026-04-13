@@ -225,42 +225,72 @@ def _load_geco(cfg: dict) -> pd.DataFrame:
 
 def _assign_sentence_ids(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFrame:
     """
-    Assign sentence_id and within-sentence word_position.
-    Sentences are split whenever a word ends in '.', '?', or '!'.
+    Assign sentence_id, sentence_text, and within-sentence word_position.
+    Operates on UNIQUE words (one row per story × word_position) then merges
+    back — avoids iterating over all 800K subject-level rows.
     """
-    records = []
-    for key, grp in df.groupby(group_cols):
+    # Step 1: unique words per story position
+    unique_words = (
+        df[group_cols + ["word_position", "word"]]
+        .drop_duplicates(subset=group_cols + ["word_position"])
+        .sort_values(group_cols + ["word_position"])
+        .reset_index(drop=True)
+    )
+
+    # Step 2: assign sentence boundaries on unique words
+    sent_records = []
+    for key, grp in unique_words.groupby(group_cols, sort=True):
         grp = grp.sort_values("word_position").reset_index(drop=True)
-        sent_id = 0
-        sent_pos = 0
+        sent_id   = 0
+        sent_pos  = 0
         sent_words: list[str] = []
-        rows = []
+        rows: list[dict] = []
 
         for _, row in grp.iterrows():
-            row = row.copy()
-            row["sentence_id"]   = sent_id
-            row["word_position"] = sent_pos
-            sent_words.append(row["word"])
-            rows.append(row)
+            rows.append({
+                **{c: (key if len(group_cols) == 1 else key[i])
+                   for i, c in enumerate(group_cols)},
+                "story_word_pos": int(row["word_position"]),  # original position
+                "sentence_id":    sent_id,
+                "sent_word_pos":  sent_pos,
+            })
+            sent_words.append(str(row["word"]))
             sent_pos += 1
-            if row["word"].rstrip("\"'").endswith((".", "?", "!")):
+            if str(row["word"]).rstrip("\"'").endswith((".", "?", "!")):
                 sent_text = " ".join(sent_words)
                 for r in rows:
                     r["sentence_text"] = sent_text
-                records.extend(rows)
-                sent_id  += 1
-                sent_pos  = 0
+                sent_records.extend(rows)
+                sent_id   += 1
+                sent_pos   = 0
                 sent_words = []
                 rows       = []
 
-        # flush remaining words in last (possibly unterminated) sentence
         if rows:
             sent_text = " ".join(sent_words)
             for r in rows:
                 r["sentence_text"] = sent_text
-            records.extend(rows)
+            sent_records.extend(rows)
 
-    return pd.DataFrame(records)
+    sent_df = pd.DataFrame(sent_records)
+
+    # Step 3: merge sentence info back using original word_position as key
+    merge_cols = group_cols + ["story_word_pos"]
+    df = df.copy()
+    df["story_word_pos"] = df["word_position"].astype(int)
+    df = df.merge(
+        sent_df[merge_cols + ["sentence_id", "sentence_text"]],
+        on=merge_cols,
+        how="left",
+    )
+    df = df.drop(columns=["story_word_pos"])
+
+    # Step 4: reset word_position to 0-based within each sentence per subject
+    df["word_position"] = df.groupby(
+        group_cols + ["sentence_id", "subject"]
+    ).cumcount()
+
+    return df
 
 
 def _apply_exclusions(df: pd.DataFrame, bay_cfg: dict) -> pd.DataFrame:
