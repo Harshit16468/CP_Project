@@ -247,12 +247,17 @@ def _assign_sentence_ids(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFram
         rows: list[dict] = []
 
         for _, row in grp.iterrows():
+            # Explicitly cast group keys to Python int so DataFrame
+            # infers int64 (not object) when built from these dicts.
+            key_vals = {
+                c: int(key) if len(group_cols) == 1 else int(key[i])
+                for i, c in enumerate(group_cols)
+            }
             rows.append({
-                **{c: (key if len(group_cols) == 1 else key[i])
-                   for i, c in enumerate(group_cols)},
-                "story_word_pos": int(row["word_position"]),  # original position
-                "sentence_id":    sent_id,
-                "sent_word_pos":  sent_pos,
+                **key_vals,
+                "story_word_pos": int(row["word_position"]),
+                "sentence_id":    int(sent_id),
+                "sent_word_pos":  int(sent_pos),
             })
             sent_words.append(str(row["word"]))
             sent_pos += 1
@@ -273,11 +278,7 @@ def _assign_sentence_ids(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFram
             sent_records.extend(rows)
 
     sent_df = pd.DataFrame(sent_records)
-    # Ensure key columns are int64 (dict-built DataFrames can infer object)
-    for c in group_cols:
-        sent_df[c] = pd.to_numeric(sent_df[c], errors="coerce").astype(int)
-    sent_df["story_word_pos"] = sent_df["story_word_pos"].astype(int)
-    sent_df["sentence_id"]   = sent_df["sentence_id"].astype(int)
+    # Values are already Python ints from the record-building loop above
 
     # Step 3: merge sentence info back using original word_position as key
     merge_cols = group_cols + ["story_word_pos"]
