@@ -87,9 +87,9 @@ class BayesianHierarchicalModel:
         clean = df[cols].dropna().copy()
         logger.info("Fitting on %d observations after dropping NaN rows.", len(clean))
 
-        # Subsample to keep memory/compute tractable
-        max_obs = self.cfg.get("max_obs", 50_000)
-        if len(clean) > max_obs:
+        # Optional subsample (set max_obs in config to enable)
+        max_obs = self.cfg.get("max_obs", None)
+        if max_obs and len(clean) > max_obs:
             rng = np.random.default_rng(self.seed)
             idx = rng.choice(len(clean), size=max_obs, replace=False)
             clean = clean.iloc[idx].copy()
@@ -196,8 +196,10 @@ class BayesianHierarchicalModel:
                 progressbar=True,
                 return_inferencedata=True,
             )
-            # Compute log-likelihood for LOO (memory-safe after subsampling)
-            idata = pm.compute_log_likelihood(idata)
+            # Only compute log-likelihood if requested (chains×draws×n_obs matrix
+            # can be several GB for large datasets — skip when compare_loo=False)
+            if self.cfg.get("compute_loo", False):
+                idata = pm.compute_log_likelihood(idata)
 
         logger.info("Sampling complete.")
         return idata

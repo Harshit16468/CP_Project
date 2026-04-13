@@ -290,12 +290,14 @@ def step6_bayesian(cfg: dict, df: pd.DataFrame) -> None:
         )
         idata_results[variant_name] = idata
 
-    # ── Model comparison ─────────────────────────────────────────────────────
-    if len(idata_results) > 1:
+    # ── Model comparison (only when log-likelihood was computed) ─────────────
+    if len(idata_results) > 1 and bay_cfg.get("compute_loo", False):
         logger.info("Running LOO-CV model comparison …")
         comparison = bm.compare_models(idata_results)
         comparison.to_csv(results_dir / "06_model_comparison.csv")
         logger.info("Model comparison saved.")
+    elif len(idata_results) > 1:
+        logger.info("Skipping LOO comparison (compute_loo=False in config).")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
