@@ -247,12 +247,9 @@ def _assign_sentence_ids(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFram
         rows: list[dict] = []
 
         for _, row in grp.iterrows():
-            # Explicitly cast group keys to Python int so DataFrame
-            # infers int64 (not object) when built from these dicts.
-            key_vals = {
-                c: int(key) if len(group_cols) == 1 else int(key[i])
-                for i, c in enumerate(group_cols)
-            }
+            # groupby with a list always returns a tuple key, even for 1 column
+            key_tuple = key if isinstance(key, tuple) else (key,)
+            key_vals = {c: int(key_tuple[i]) for i, c in enumerate(group_cols)}
             rows.append({
                 **key_vals,
                 "story_word_pos": int(row["word_position"]),
