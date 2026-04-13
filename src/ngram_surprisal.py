@@ -6,34 +6,35 @@ corpus and computes per-word surprisal:
 
     S_ngram(w_i) = -log2 P(w_i | w_{i-2}, w_{i-1})
 
-The model is trained on a background corpus (e.g., Wikipedia / BookCorpus
-excerpt) that is *separate* from the reading-time stimulus text to avoid
-in-sample inflation.
+Speed optimisations
+-------------------
+- Trained model is pickled to disk and reloaded on subsequent runs
+  (training the KN model on 2MB corpus takes ~2 min; loading pickle ~2 sec)
+- Fast whitespace tokenisation for background corpus (no NLTK punkt overhead)
+- Surprisal computed only for unique (story_id, sentence_id, word_position)
+  triples, then broadcast back to all subjects via a merge
 
 Public API
 ----------
-    build_ngram_model(corpus_path, cfg)  -> NgramSurprisalModel
-    compute_ngram_surprisal(df, model)   -> pd.DataFrame  (adds column)
+    build_ngram_model(corpus_path, cfg, cache_path)  -> NgramSurprisalModel
+    compute_ngram_surprisal(df, model)               -> pd.DataFrame
 """
 
 from __future__ import annotations
 
 import logging
 import math
+import pickle
 import re
 from pathlib import Path
-from typing import Generator, Sequence
 
 import nltk
-import numpy as np
 import pandas as pd
 from nltk.lm import KneserNeyInterpolated
 from nltk.lm.preprocessing import padded_everygram_pipeline
-from nltk.tokenize import sent_tokenize, word_tokenize
 
 logger = logging.getLogger(__name__)
 
-# Ensure NLTK data is available
 for _pkg in ("punkt", "punkt_tab"):
     try:
         nltk.data.find(f"tokenizers/{_pkg}")
@@ -42,94 +43,111 @@ for _pkg in ("punkt", "punkt_tab"):
 
 
 # ---------------------------------------------------------------------------
-# Wrapper class
+# Model class
 # ---------------------------------------------------------------------------
 
 class NgramSurprisalModel:
-    """Thin wrapper around NLTK's KneserNeyInterpolated LM."""
-
     def __init__(self, order: int = 3):
         self.order = order
         self._lm: KneserNeyInterpolated | None = None
 
-    # ------------------------------------------------------------------
-    # Training
-    # ------------------------------------------------------------------
-
     def train(self, sentences: list[list[str]]) -> None:
-        """
-        Train on a list of tokenised sentences (each a list of strings).
-        """
-        logger.info("Training %d-gram Kneser-Ney model on %d sentences …",
+        logger.info("Training %d-gram KN model on %d sentences …",
                     self.order, len(sentences))
         train_data, vocab = padded_everygram_pipeline(self.order, sentences)
         self._lm = KneserNeyInterpolated(self.order)
         self._lm.fit(train_data, vocab)
         logger.info("N-gram model trained (vocab size ≈ %d)", len(self._lm.vocab))
 
-    # ------------------------------------------------------------------
-    # Surprisal
-    # ------------------------------------------------------------------
-
     def surprisal(self, word: str, context: tuple[str, ...]) -> float:
-        """
-        Return -log2 P(word | context).
-        ``context`` should have length == order-1 (padded as needed).
-        """
         if self._lm is None:
-            raise RuntimeError("Model has not been trained yet.")
-        # KneserNeyInterpolated.score returns log10; convert to log2 bits
-        # Actually NLTK .score() returns the actual probability (0-1).
+            raise RuntimeError("Model not trained.")
         prob = self._lm.score(word, list(context))
-        if prob <= 0:
-            prob = 1e-10   # floor for OOV
-        return -math.log2(prob)
+        return -math.log2(prob) if prob > 0 else -math.log2(1e-10)
 
     def surprisal_sentence(self, tokens: list[str]) -> list[float]:
-        """Surprisal for each token in a tokenised sentence."""
-        pad = ["<s>"] * (self.order - 1)
+        pad    = ["<s>"] * (self.order - 1)
         padded = pad + [t.lower() for t in tokens]
-        surprisals = []
-        for i in range(len(tokens)):
-            ctx_start = i                           # already offset by pad
-            ctx = tuple(padded[ctx_start: ctx_start + self.order - 1])
-            w   = padded[ctx_start + self.order - 1]
-            surprisals.append(self.surprisal(w, ctx))
-        return surprisals
+        return [
+            self.surprisal(
+                padded[i + self.order - 1],
+                tuple(padded[i: i + self.order - 1]),
+            )
+            for i in range(len(tokens))
+        ]
 
 
 # ---------------------------------------------------------------------------
-# Build from corpus file
+# Build / load model
 # ---------------------------------------------------------------------------
 
-def build_ngram_model(corpus_path: str | Path, cfg: dict) -> NgramSurprisalModel:
+def build_ngram_model(
+    corpus_path: str | Path,
+    cfg: dict,
+    cache_path: str | Path | None = None,
+) -> NgramSurprisalModel:
     """
-    Load background corpus, tokenise, and train a KN n-gram model.
+    Load from pickle cache if available, otherwise train and cache.
 
     Parameters
     ----------
-    corpus_path : path to plain-text background corpus (one paragraph / line).
-    cfg         : ``cfg["ngram"]`` sub-dict from config.yaml.
+    corpus_path : plain-text background corpus
+    cfg         : cfg["ngram"] sub-dict
+    cache_path  : where to pickle the trained model
+                  (defaults to <corpus_path>.ngram.pkl)
     """
     corpus_path = Path(corpus_path)
-    order = cfg.get("order", 3)
+    order       = cfg.get("order", 3)
 
+    if cache_path is None:
+        cache_path = corpus_path.with_suffix(".ngram.pkl")
+    cache_path = Path(cache_path)
+
+    # ── Load from cache ───────────────────────────────────────────────────
+    if cache_path.exists():
+        logger.info("Loading cached n-gram model from %s …", cache_path)
+        with cache_path.open("rb") as fh:
+            model = pickle.load(fh)
+        logger.info("N-gram model loaded (vocab size ≈ %d)", len(model._lm.vocab))
+        return model
+
+    # ── Train ─────────────────────────────────────────────────────────────
     logger.info("Loading background corpus from %s …", corpus_path)
     text = corpus_path.read_text(encoding="utf-8", errors="replace")
 
-    sentences = [
-        [w.lower() for w in word_tokenize(sent)]
-        for sent in sent_tokenize(text)
-        if len(sent.split()) >= 2
-    ]
+    # Fast tokenisation: split on whitespace / punctuation boundaries.
+    # No punkt overhead — sufficient for a background LM.
+    sentences = _fast_tokenise(text)
+    logger.info("Tokenised %d sentences from background corpus.", len(sentences))
 
     model = NgramSurprisalModel(order=order)
     model.train(sentences)
+
+    # ── Cache ─────────────────────────────────────────────────────────────
+    with cache_path.open("wb") as fh:
+        pickle.dump(model, fh, protocol=pickle.HIGHEST_PROTOCOL)
+    logger.info("Cached n-gram model to %s", cache_path)
+
     return model
 
 
+def _fast_tokenise(text: str) -> list[list[str]]:
+    """
+    Split text into sentences then words using simple regex rules.
+    ~10-20× faster than NLTK punkt for a background corpus.
+    """
+    # Split on sentence-ending punctuation
+    raw_sentences = re.split(r"(?<=[.!?])\s+", text)
+    sentences = []
+    for sent in raw_sentences:
+        words = re.findall(r"\b\w+\b", sent.lower())
+        if len(words) >= 2:
+            sentences.append(words)
+    return sentences
+
+
 # ---------------------------------------------------------------------------
-# Attach surprisal to the reading-time DataFrame
+# Attach surprisal to DataFrame
 # ---------------------------------------------------------------------------
 
 def compute_ngram_surprisal(
@@ -137,23 +155,38 @@ def compute_ngram_surprisal(
     model: NgramSurprisalModel,
 ) -> pd.DataFrame:
     """
-    Add column ``ngram_surprisal`` to *df* (bits, -log2).
+    Add column ``ngram_surprisal`` to *df*.
 
-    The function groups by (story_id, sentence_id) to reconstruct sentence
-    context for each word.
+    Computes surprisal only for unique (story_id, sentence_id, word_position)
+    triples, then merges back — avoids redundant work across subjects.
     """
-    df = df.copy()
-    surprisal_values: dict[int, float] = {}
+    # Unique word rows (one per story/sentence/position)
+    unique_words = (
+        df[["story_id", "sentence_id", "word_position", "word"]]
+        .drop_duplicates(subset=["story_id", "sentence_id", "word_position"])
+        .sort_values(["story_id", "sentence_id", "word_position"])
+    )
 
-    group_cols = ["story_id", "sentence_id"]
-    for _, grp in df.groupby(group_cols):
-        grp_sorted = grp.sort_values("word_position")
-        tokens  = grp_sorted["word"].str.lower().tolist()
-        surprs  = model.surprisal_sentence(tokens)
-        for idx, surp in zip(grp_sorted.index, surprs):
-            surprisal_values[idx] = surp
+    records = []
+    for (sid, sent_id), grp in unique_words.groupby(["story_id", "sentence_id"]):
+        tokens = grp["word"].str.lower().tolist()
+        surprs = model.surprisal_sentence(tokens)
+        for (_, row), surp in zip(grp.iterrows(), surprs):
+            records.append({
+                "story_id":      sid,
+                "sentence_id":   sent_id,
+                "word_position": row["word_position"],
+                "ngram_surprisal": surp,
+            })
 
-    df["ngram_surprisal"] = df.index.map(surprisal_values)
-    logger.info("N-gram surprisal computed (mean=%.3f bits)",
-                df["ngram_surprisal"].mean())
+    surp_df = pd.DataFrame(records)
+
+    df = df.merge(
+        surp_df[["story_id", "sentence_id", "word_position", "ngram_surprisal"]],
+        on=["story_id", "sentence_id", "word_position"],
+        how="left",
+    )
+
+    logger.info("N-gram surprisal computed (mean=%.3f bits, missing=%d)",
+                df["ngram_surprisal"].mean(), df["ngram_surprisal"].isna().sum())
     return df

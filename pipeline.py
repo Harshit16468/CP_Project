@@ -114,9 +114,10 @@ def step2_ngram(cfg: dict, df: pd.DataFrame) -> pd.DataFrame:
         logger.info("Loading cached n-gram surprisal from %s", cache)
         return pd.read_parquet(cache)
 
-    corpus_path = Path(cfg["paths"]["ngram_corpus"])
-    model       = build_ngram_model(corpus_path, cfg["ngram"])
-    df          = compute_ngram_surprisal(df, model)
+    corpus_path     = Path(cfg["paths"]["ngram_corpus"])
+    model_cache     = cache_path(cfg, "ngram_model.pkl")
+    model           = build_ngram_model(corpus_path, cfg["ngram"], cache_path=model_cache)
+    df              = compute_ngram_surprisal(df, model)
     df.to_parquet(cache, index=True)
     return df
 
