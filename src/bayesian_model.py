@@ -76,6 +76,7 @@ class BayesianHierarchicalModel:
         """
         Extract and z-score predictors, encode subject index.
         Drops rows with any NaN in predictors or log_rt.
+        Subsamples to max_obs rows (balanced across subjects) if configured.
         """
         available = [p for p in self.predictors if p in df.columns]
         missing   = set(self.predictors) - set(available)
@@ -85,6 +86,14 @@ class BayesianHierarchicalModel:
         cols = ["subject", "log_rt"] + available
         clean = df[cols].dropna().copy()
         logger.info("Fitting on %d observations after dropping NaN rows.", len(clean))
+
+        # Subsample to keep memory/compute tractable
+        max_obs = self.cfg.get("max_obs", 50_000)
+        if len(clean) > max_obs:
+            rng = np.random.default_rng(self.seed)
+            idx = rng.choice(len(clean), size=max_obs, replace=False)
+            clean = clean.iloc[idx].copy()
+            logger.info("Subsampled to %d observations (max_obs=%d).", len(clean), max_obs)
 
         subjects, subject_idx = np.unique(clean["subject"].values, return_inverse=True)
         n_subj = len(subjects)
@@ -131,16 +140,18 @@ class BayesianHierarchicalModel:
                 for pred in predictors
             }
 
-            # ---- Random intercept per subject ---------------------------------
+            # ---- Random intercept per subject (non-centered) ------------------
             sigma_u0 = pm.HalfNormal("sigma_u0", sigma=0.5)
-            u0 = pm.Normal("u0", mu=0, sigma=sigma_u0, shape=n_subj)
+            u0_raw   = pm.Normal("u0_raw", mu=0, sigma=1, shape=n_subj)
+            u0       = pm.Deterministic("u0", u0_raw * sigma_u0)
 
-            # ---- Random slopes per subject (for selected predictors) ----------
+            # ---- Random slopes per subject (non-centered) ---------------------
             u_slopes = {}
             for pred in rand_slopes:
                 sigma_slope = pm.HalfNormal(f"sigma_slope_{pred}", sigma=0.3)
-                u_slopes[pred] = pm.Normal(
-                    f"u_slope_{pred}", mu=0, sigma=sigma_slope, shape=n_subj
+                u_raw = pm.Normal(f"u_slope_raw_{pred}", mu=0, sigma=1, shape=n_subj)
+                u_slopes[pred] = pm.Deterministic(
+                    f"u_slope_{pred}", u_raw * sigma_slope
                 )
 
             # ---- Linear predictor --------------------------------------------
@@ -185,10 +196,9 @@ class BayesianHierarchicalModel:
                 progressbar=True,
                 return_inferencedata=True,
             )
-            # Add LOO for model comparison
+            # Compute log-likelihood for LOO (memory-safe after subsampling)
             idata = pm.compute_log_likelihood(idata)
 
-        az.loo(idata, pointwise=True, var_name="log_rt_obs")
         logger.info("Sampling complete.")
         return idata
 

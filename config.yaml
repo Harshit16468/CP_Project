@@ -89,6 +89,7 @@ bayesian:
   min_rt_ms: 100
   max_rt_ms: 3000
   # PyMC sampler settings
+  max_obs: 50000              # subsample for MCMC tractability
   draws: 500
   tune: 500
   chains: 2
