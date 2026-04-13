@@ -27,8 +27,18 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 from pathlib import Path
+
+# Redirect all HuggingFace / torch model caches to /tmp
+os.environ.setdefault("HF_HOME",              "/tmp/psycholingu/hf_cache")
+os.environ.setdefault("TRANSFORMERS_CACHE",   "/tmp/psycholingu/hf_cache/hub")
+os.environ.setdefault("HF_DATASETS_CACHE",    "/tmp/psycholingu/hf_cache/datasets")
+os.environ.setdefault("TORCH_HOME",           "/tmp/psycholingu/torch_cache")
+os.environ.setdefault("XDG_CACHE_HOME",       "/tmp/psycholingu/xdg_cache")
+# Stanza models
+os.environ.setdefault("STANZA_RESOURCES_DIR", "/tmp/psycholingu/stanza_resources")
 
 import pandas as pd
 import yaml

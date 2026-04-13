@@ -26,9 +26,8 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 
-ROOT    = Path(__file__).resolve().parent.parent
-RAW     = ROOT / "data" / "raw"
-NS_DIR  = RAW / "natural_stories"
+RAW    = Path("/tmp/psycholingu/data/raw")
+NS_DIR = RAW / "natural_stories"
 
 # ---------------------------------------------------------------------------
 # Natural Stories Corpus (MIT Language & Intelligence Lab)
@@ -70,6 +69,7 @@ def download_ngram_corpus(n_articles: int = 100) -> None:
     Fetch ~n_articles Wikipedia article summaries and write to
     data/raw/ngram_corpus.txt.
     """
+    RAW.mkdir(parents=True, exist_ok=True)
     dest = RAW / "ngram_corpus.txt"
     if dest.exists():
         logger.info("N-gram corpus already exists at %s", dest)

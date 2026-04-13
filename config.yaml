@@ -6,23 +6,23 @@
 # ============================================================
 
 paths:
-  raw_data:       data/raw
-  processed_data: data/processed
-  results:        results/metrics
-  figures:        results/figures
-  ngram_corpus:   data/raw/ngram_corpus.txt   # background corpus for n-gram training
+  raw_data:       /tmp/psycholingu/data/raw
+  processed_data: /tmp/psycholingu/data/processed
+  results:        /tmp/psycholingu/results/metrics
+  figures:        /tmp/psycholingu/results/figures
+  ngram_corpus:   /tmp/psycholingu/data/raw/ngram_corpus.txt
 
 # Dataset choice: "natural_stories" | "geco" | "dundee"
 dataset: natural_stories
 
 natural_stories:
-  stories_file:  data/raw/natural_stories/all_stories.tok
-  rt_file:       data/raw/natural_stories/processed_RTs.tsv
-  wordinfo_file: data/raw/natural_stories/processed_wordinfo.tsv
+  stories_file:  /tmp/psycholingu/data/raw/natural_stories/all_stories.tok
+  rt_file:       /tmp/psycholingu/data/raw/natural_stories/processed_RTs.tsv
+  wordinfo_file: /tmp/psycholingu/data/raw/natural_stories/processed_wordinfo.tsv
 
 geco:
-  words_file:    data/raw/geco/EnglishMaterial.xlsx
-  rt_file:       data/raw/geco/L1ReadingData.xlsx
+  words_file:    /tmp/psycholingu/data/raw/geco/EnglishMaterial.xlsx
+  rt_file:       /tmp/psycholingu/data/raw/geco/L1ReadingData.xlsx
 
 # ----------------------------------------------------------------
 # N-gram model
