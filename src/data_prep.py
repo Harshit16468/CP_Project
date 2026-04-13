@@ -273,10 +273,17 @@ def _assign_sentence_ids(df: pd.DataFrame, group_cols: list[str]) -> pd.DataFram
             sent_records.extend(rows)
 
     sent_df = pd.DataFrame(sent_records)
+    # Ensure key columns are int64 (dict-built DataFrames can infer object)
+    for c in group_cols:
+        sent_df[c] = pd.to_numeric(sent_df[c], errors="coerce").astype(int)
+    sent_df["story_word_pos"] = sent_df["story_word_pos"].astype(int)
+    sent_df["sentence_id"]   = sent_df["sentence_id"].astype(int)
 
     # Step 3: merge sentence info back using original word_position as key
     merge_cols = group_cols + ["story_word_pos"]
     df = df.copy()
+    for c in group_cols:
+        df[c] = df[c].astype(int)
     df["story_word_pos"] = df["word_position"].astype(int)
     df = df.merge(
         sent_df[merge_cols + ["sentence_id", "sentence_text"]],
