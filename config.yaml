@@ -1,0 +1,96 @@
+
+# ============================================================
+# Project Configuration
+# Disentangling Predictive Surprisal, Entropy, and Syntactic
+# Integration Cost in Human Sentence Processing
+# ============================================================
+
+paths:
+  raw_data:       data/raw
+  processed_data: data/processed
+  results:        results/metrics
+  figures:        results/figures
+  ngram_corpus:   data/raw/ngram_corpus.txt   # background corpus for n-gram training
+
+# Dataset choice: "natural_stories" | "geco" | "dundee"
+dataset: natural_stories
+
+natural_stories:
+  stories_file:  data/raw/natural_stories/all_stories.tok
+  rt_file:       data/raw/natural_stories/processed_RTs.tsv
+  wordinfo_file: data/raw/natural_stories/processed_wordinfo.tsv
+
+geco:
+  words_file:    data/raw/geco/EnglishMaterial.xlsx
+  rt_file:       data/raw/geco/L1ReadingData.xlsx
+
+# ----------------------------------------------------------------
+# N-gram model
+# ----------------------------------------------------------------
+ngram:
+  order: 3                        # trigram
+  smoothing: kneser_ney
+  min_count: 1
+
+# ----------------------------------------------------------------
+# Neural language models
+# ----------------------------------------------------------------
+models:
+  gpt2:
+    name: gpt2
+    type: causal                  # left-to-right autoregressive
+    batch_size: 8
+    device: auto                  # "cpu" | "cuda" | "auto"
+
+  bert:
+    name: bert-base-uncased
+    type: masked                  # pseudo-surprisal via masking
+    batch_size: 8
+    device: auto
+
+  t5:
+    name: t5-base
+    type: seq2seq
+    batch_size: 8
+    device: auto
+
+# ----------------------------------------------------------------
+# Attention analysis
+# ----------------------------------------------------------------
+attention:
+  models: [gpt2, bert]           # models to extract heads from
+  layers: all                     # "all" or list of layer indices
+  correlation_method: spearman
+
+# ----------------------------------------------------------------
+# Integration cost (UD parsing)
+# ----------------------------------------------------------------
+integration_cost:
+  parser: stanza                  # "stanza" | "spacy"
+  language: en
+
+# ----------------------------------------------------------------
+# Bayesian hierarchical model
+# ----------------------------------------------------------------
+bayesian:
+  predictors:
+    - ngram_surprisal
+    - gpt2_surprisal
+    - bert_surprisal
+    - t5_surprisal
+    - gpt2_entropy
+    - bert_entropy
+    - integration_cost
+  random_slopes:
+    - gpt2_surprisal
+    - integration_cost
+  rt_transform: log               # "log" | "none"
+  outlier_sd_cutoff: 3.0          # remove RTs beyond N SDs per subject
+  min_rt_ms: 100
+  max_rt_ms: 3000
+  # PyMC sampler settings
+  draws: 2000
+  tune: 1000
+  chains: 4
+  target_accept: 0.9
+  random_seed: 42
