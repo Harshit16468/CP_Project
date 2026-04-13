@@ -158,34 +158,40 @@ def compute_ngram_surprisal(
     Add column ``ngram_surprisal`` to *df*.
 
     Computes surprisal only for unique (story_id, sentence_id, word_position)
-    triples, then merges back — avoids redundant work across subjects.
+    triples, then maps back via a dict — avoids slow pandas merge on large
+    DataFrames with nullable Int64 key columns.
     """
-    # Unique word rows (one per story/sentence/position)
+    # Normalise key columns to plain Python ints to avoid Int64/NaN issues
+    tmp = df[["story_id", "sentence_id", "word_position", "word"]].copy()
+    tmp["story_id"]      = tmp["story_id"].astype(int)
+    tmp["sentence_id"]   = tmp["sentence_id"].fillna(-1).astype(int)
+    tmp["word_position"] = tmp["word_position"].astype(int)
+
     unique_words = (
-        df[["story_id", "sentence_id", "word_position", "word"]]
-        .drop_duplicates(subset=["story_id", "sentence_id", "word_position"])
-        .sort_values(["story_id", "sentence_id", "word_position"])
+        tmp.drop_duplicates(subset=["story_id", "sentence_id", "word_position"])
+           .sort_values(["story_id", "sentence_id", "word_position"])
     )
 
-    records = []
+    # Build a (story_id, sentence_id, word_position) -> surprisal dict
+    surp_dict: dict[tuple[int, int, int], float] = {}
+    n_sentences = unique_words.groupby(["story_id", "sentence_id"]).ngroups
+    logger.info("Computing n-gram surprisal for %d unique sentences …", n_sentences)
+
     for (sid, sent_id), grp in unique_words.groupby(["story_id", "sentence_id"]):
         tokens = grp["word"].str.lower().tolist()
         surprs = model.surprisal_sentence(tokens)
-        for (_, row), surp in zip(grp.iterrows(), surprs):
-            records.append({
-                "story_id":      sid,
-                "sentence_id":   sent_id,
-                "word_position": row["word_position"],
-                "ngram_surprisal": surp,
-            })
+        for wpos, surp in zip(grp["word_position"].tolist(), surprs):
+            surp_dict[(int(sid), int(sent_id), int(wpos))] = surp
 
-    surp_df = pd.DataFrame(records)
-
-    df = df.merge(
-        surp_df[["story_id", "sentence_id", "word_position", "ngram_surprisal"]],
-        on=["story_id", "sentence_id", "word_position"],
-        how="left",
-    )
+    # Vectorised lookup — much faster than merge on 800K rows
+    df = df.copy()
+    sids  = df["story_id"].astype(int).tolist()
+    sents = df["sentence_id"].fillna(-1).astype(int).tolist()
+    wpos  = df["word_position"].astype(int).tolist()
+    df["ngram_surprisal"] = [
+        surp_dict.get((s, se, w), float("nan"))
+        for s, se, w in zip(sids, sents, wpos)
+    ]
 
     logger.info("N-gram surprisal computed (mean=%.3f bits, missing=%d)",
                 df["ngram_surprisal"].mean(), df["ngram_surprisal"].isna().sum())
