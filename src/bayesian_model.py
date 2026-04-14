@@ -258,14 +258,24 @@ class BayesianHierarchicalModel:
             scale=sigma_eps[:, :, None],
         )  # (chains, draws, n_loo)
 
-        idata_sub = az.from_dict(
-            log_likelihood={"log_rt_obs": log_lik}
-        )
         logger.info(
             "LOO subsample: %d / %d obs, log_lik array %.1f MB",
             n_loo, n_obs, log_lik.nbytes / 1e6,
         )
-        return az.loo(idata_sub, var_name="log_rt_obs")
+
+        # Compute reff from actual posterior (needed by az.loo when no
+        # posterior group is present in the subsampled idata)
+        n_samples = idata.posterior.sizes["chain"] * idata.posterior.sizes["draw"]
+        try:
+            ess = az.ess(idata, var_names=["intercept"], method="bulk")
+            reff = float(float(ess["intercept"].values.mean()) / n_samples)
+            reff = float(np.clip(reff, 0.01, 1.0))
+        except Exception:
+            reff = 1.0
+        logger.info("reff=%.3f", reff)
+
+        idata_sub = az.from_dict(log_likelihood={"log_rt_obs": log_lik})
+        return az.loo(idata_sub, var_name="log_rt_obs", reff=reff)
 
     # ------------------------------------------------------------------
     # Model comparison
