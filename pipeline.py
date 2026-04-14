@@ -33,6 +33,9 @@ from pathlib import Path
 
 # Redirect all HuggingFace / torch model caches to /tmp
 os.environ.setdefault("HF_HOME",              "/tmp/psycholingu/hf_cache")
+# Use available CPU cores for PyTensor (PyMC backend)
+os.environ.setdefault("OMP_NUM_THREADS",      "6")
+os.environ.setdefault("MKL_NUM_THREADS",      "6")
 os.environ.setdefault("TRANSFORMERS_CACHE",   "/tmp/psycholingu/hf_cache/hub")
 os.environ.setdefault("HF_DATASETS_CACHE",    "/tmp/psycholingu/hf_cache/datasets")
 os.environ.setdefault("TORCH_HOME",           "/tmp/psycholingu/torch_cache")
