@@ -191,6 +191,7 @@ class BayesianHierarchicalModel:
                 draws=self.draws,
                 tune=self.tune,
                 chains=self.chains,
+                cores=self.chains,   # one core per chain — parallel sampling
                 target_accept=self.target_acc,
                 random_seed=self.seed,
                 progressbar=True,

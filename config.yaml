@@ -90,9 +90,9 @@ bayesian:
   max_rt_ms: 3000
   # PyMC sampler settings
   # max_obs: 50000            # uncomment to subsample (e.g. when testing)
-  compute_loo: false          # set true only if you have enough RAM (~8GB+)
-  draws: 500
-  tune: 500
-  chains: 2
+  compute_loo: true
+  draws: 2000
+  tune: 1000
+  chains: 4
   target_accept: 0.9
   random_seed: 42
