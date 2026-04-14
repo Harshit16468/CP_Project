@@ -179,7 +179,8 @@ class BayesianHierarchicalModel:
         """
         Fit the model and return an ArviZ InferenceData object.
         """
-        data = self._prepare_data(df)
+        data       = self._prepare_data(df)
+        self._last_data = data          # needed for subsampled LOO
         pymc_model = self._build_model(data)
 
         logger.info(
@@ -197,22 +198,74 @@ class BayesianHierarchicalModel:
                 progressbar=True,
                 return_inferencedata=True,
             )
-            # Compute log-likelihood in-context, compute LOO, then drop the
-            # huge array before saving (53GB for 835K obs — not worth keeping)
-            if self.cfg.get("compute_loo", False):
-                idata = pm.compute_log_likelihood(idata)
+            pass  # log_likelihood computed via subsampling below — no OOM
 
         if self.cfg.get("compute_loo", False):
-            logger.info("Computing LOO …")
-            self.last_loo = az.loo(idata, var_name="log_rt_obs")
+            logger.info("Computing subsampled LOO …")
+            self.last_loo = self._compute_loo_subsampled(
+                idata, self._last_data,
+                n_loo=self.cfg.get("loo_subsample", 20_000),
+            )
             logger.info("LOO ELPD=%.2f (SE=%.2f)", self.last_loo.elpd_loo, self.last_loo.se)
-            # Drop log_likelihood — already used for LOO, no need to persist 53GB
-            del idata.log_likelihood
         else:
             self.last_loo = None
 
         logger.info("Sampling complete.")
         return idata
+
+    def _compute_loo_subsampled(
+        self, idata: az.InferenceData, data: dict, n_loo: int = 20_000
+    ) -> az.ELPDData:
+        """
+        Compute LOO-CV on a random subsample of observations to avoid OOM.
+
+        Uses the already-sampled posterior to evaluate the normal log-likelihood
+        at n_loo randomly selected observations. Memory: chains×draws×n_loo×8B
+        (~1.3 GB for n_loo=20K, 4 chains, 2K draws).
+        """
+        import xarray as xr
+        from scipy.stats import norm as sp_norm
+
+        n_obs = data["n_obs"]
+        n_loo = min(n_loo, n_obs)
+        rng   = np.random.default_rng(self.seed + 99)
+        idx   = rng.choice(n_obs, size=n_loo, replace=False)
+
+        post       = idata.posterior
+        intercept  = post["intercept"].values          # (chains, draws)
+        sigma_eps  = post["sigma_eps"].values          # (chains, draws)
+        u0         = post["u0"].values                 # (chains, draws, n_subj)
+        chains, draws = intercept.shape
+
+        subj_sub   = data["subject_idx"][idx]          # (n_loo,)
+        log_rt_sub = data["log_rt"][idx]               # (n_loo,)
+
+        # mu: (chains, draws, n_loo)
+        mu = intercept[:, :, None] + u0[:, :, subj_sub]
+
+        rand_slopes = [p for p in self.rand_slopes if p in data["predictors"]]
+        for pred in data["predictors"]:
+            X_sub = data["X"][pred][idx]               # (n_loo,)
+            beta  = post[f"beta_{pred}"].values        # (chains, draws)
+            mu    = mu + beta[:, :, None] * X_sub[None, None, :]
+            if pred in rand_slopes:
+                u_sl = post[f"u_slope_{pred}"].values  # (chains, draws, n_subj)
+                mu   = mu + u_sl[:, :, subj_sub] * X_sub[None, None, :]
+
+        log_lik = sp_norm.logpdf(
+            log_rt_sub[None, None, :],
+            loc=mu,
+            scale=sigma_eps[:, :, None],
+        )  # (chains, draws, n_loo)
+
+        idata_sub = az.from_dict(
+            log_likelihood={"log_rt_obs": log_lik}
+        )
+        logger.info(
+            "LOO subsample: %d / %d obs, log_lik array %.1f MB",
+            n_loo, n_obs, log_lik.nbytes / 1e6,
+        )
+        return az.loo(idata_sub, var_name="log_rt_obs")
 
     # ------------------------------------------------------------------
     # Model comparison
