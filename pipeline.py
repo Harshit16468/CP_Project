@@ -268,35 +268,49 @@ def step6_bayesian(cfg: dict, df: pd.DataFrame) -> None:
     }
 
     idata_results = {}
+    loo_results   = {}
     for variant_name, v_cfg in model_variants.items():
-        nc_path = results_dir / f"06_bayes_{variant_name}.nc"
+        nc_path  = results_dir / f"06_bayes_{variant_name}.nc"
+        loo_path = results_dir / f"06_loo_{variant_name}.csv"
+
         if nc_path.exists():
             logger.info("Loading cached Bayesian model: %s", variant_name)
             idata_results[variant_name] = bm.load(nc_path)
+            # Load cached LOO if available
+            if loo_path.exists() and bay_cfg.get("compute_loo", False):
+                import pickle
+                pkl = loo_path.with_suffix(".pkl")
+                if pkl.exists():
+                    with open(pkl, "rb") as fh:
+                        loo_results[variant_name] = pickle.load(fh)
             continue
 
         logger.info("Fitting Bayesian model: %s  predictors=%s",
                     variant_name, v_cfg["predictors"])
         variant_bm = BayesianHierarchicalModel(v_cfg)
         idata      = variant_bm.fit(df)
+
+        # Persist LOO result (tiny) before saving slim idata
+        if variant_bm.last_loo is not None:
+            import pickle
+            with open(loo_path.with_suffix(".pkl"), "wb") as fh:
+                pickle.dump(variant_bm.last_loo, fh)
+            loo_results[variant_name] = variant_bm.last_loo
+
         variant_bm.save(idata, nc_path)
 
         # Diagnostics & plots
         summary = variant_bm.summary(idata)
         summary.to_csv(results_dir / f"06_summary_{variant_name}.csv")
 
-        variant_bm.plot_posteriors(
-            idata, save_dir=figures_dir
-        )
-        variant_bm.plot_forest(
-            idata, save_dir=figures_dir
-        )
+        variant_bm.plot_posteriors(idata, save_dir=figures_dir)
+        variant_bm.plot_forest(idata, save_dir=figures_dir)
         idata_results[variant_name] = idata
 
-    # ── Model comparison (only when log-likelihood was computed) ─────────────
-    if len(idata_results) > 1 and bay_cfg.get("compute_loo", False):
+    # ── Model comparison using pre-computed LOO ───────────────────────────────
+    if len(loo_results) > 1:
         logger.info("Running LOO-CV model comparison …")
-        comparison = bm.compare_models(idata_results)
+        comparison = bm.compare_models(loo_results)
         comparison.to_csv(results_dir / "06_model_comparison.csv")
         logger.info("Model comparison saved.")
     elif len(idata_results) > 1:

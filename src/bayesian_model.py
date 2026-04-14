@@ -197,10 +197,19 @@ class BayesianHierarchicalModel:
                 progressbar=True,
                 return_inferencedata=True,
             )
-            # Only compute log-likelihood if requested (chains×draws×n_obs matrix
-            # can be several GB for large datasets — skip when compare_loo=False)
+            # Compute log-likelihood in-context, compute LOO, then drop the
+            # huge array before saving (53GB for 835K obs — not worth keeping)
             if self.cfg.get("compute_loo", False):
                 idata = pm.compute_log_likelihood(idata)
+
+        if self.cfg.get("compute_loo", False):
+            logger.info("Computing LOO …")
+            self.last_loo = az.loo(idata, var_name="log_rt_obs")
+            logger.info("LOO ELPD=%.2f (SE=%.2f)", self.last_loo.elpd_loo, self.last_loo.se)
+            # Drop log_likelihood — already used for LOO, no need to persist 53GB
+            del idata.log_likelihood
+        else:
+            self.last_loo = None
 
         logger.info("Sampling complete.")
         return idata
@@ -210,21 +219,20 @@ class BayesianHierarchicalModel:
     # ------------------------------------------------------------------
 
     def compare_models(
-        self, results: dict[str, az.InferenceData]
+        self, loo_results: dict[str, az.ELPDData]
     ) -> pd.DataFrame:
         """
-        Run LOO-CV comparison across model variants.
+        Run LOO-CV comparison across model variants using pre-computed ELPDData.
 
         Parameters
         ----------
-        results : dict mapping model_name → InferenceData
+        loo_results : dict mapping model_name → ELPDData (from az.loo)
 
         Returns
         -------
         pd.DataFrame   ArviZ compare table (sorted by ELPD)
         """
-        compare_dict = {name: idata for name, idata in results.items()}
-        comparison = az.compare(compare_dict, ic="loo", var_name="log_rt_obs")
+        comparison = az.compare(loo_results, ic="loo")
         logger.info("Model comparison:\n%s", comparison.to_string())
         return comparison
 
