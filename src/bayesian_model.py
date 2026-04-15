@@ -318,6 +318,10 @@ class BayesianHierarchicalModel:
         var_names = [f"beta_{p}" for p in self.cfg["predictors"]]
         existing  = [v for v in var_names if v in idata.posterior]
 
+        if not existing:
+            logger.warning("No beta variables in posterior — skipping posterior plot.")
+            return
+
         axes = az.plot_posterior(idata, var_names=existing, hdi_prob=0.95)
         fig  = plt.gcf()
         fig.suptitle("Posterior Distributions of Predictor Coefficients", y=1.02)
@@ -327,7 +331,7 @@ class BayesianHierarchicalModel:
             out = Path(save_dir) / "posterior_betas.png"
             fig.savefig(out, dpi=150, bbox_inches="tight")
             logger.info("Saved posterior plot to %s", out)
-        plt.show()
+        plt.close(fig)
 
     def plot_forest(
         self,
@@ -340,6 +344,10 @@ class BayesianHierarchicalModel:
         var_names = [f"beta_{p}" for p in self.cfg["predictors"]]
         existing  = [v for v in var_names if v in idata.posterior]
 
+        if not existing:
+            logger.warning("No beta variables in posterior — skipping forest plot.")
+            return
+
         axes = az.plot_forest(idata, var_names=existing, combined=True,
                               hdi_prob=0.95, r_hat=True)
         fig = plt.gcf()
@@ -350,6 +358,7 @@ class BayesianHierarchicalModel:
             out = Path(save_dir) / "forest_plot.png"
             fig.savefig(out, dpi=150, bbox_inches="tight")
             logger.info("Saved forest plot to %s", out)
+        plt.close(fig)
         plt.show()
 
     def plot_trace(
