@@ -239,11 +239,11 @@ def step6_bayesian(cfg: dict, df: pd.DataFrame) -> None:
         },
         "deep_bert": {
             **bay_cfg,
-            "predictors": ["bert_surprisal"],
+            "predictors": ["bert_base_uncased_surprisal"],
         },
-        "deep_t5": {                                   # H4: was missing
+        "deep_t5": {
             **bay_cfg,
-            "predictors": ["t5_surprisal"],
+            "predictors": ["t5_base_surprisal"],
         },
         # H2: does IC explain variance beyond deep surprisal?
         "surprisal_vs_ic": {
@@ -257,11 +257,11 @@ def step6_bayesian(cfg: dict, df: pd.DataFrame) -> None:
         },
         "surprisal_vs_entropy_bert": {
             **bay_cfg,
-            "predictors": ["bert_surprisal", "bert_entropy"],
+            "predictors": ["bert_base_uncased_surprisal", "bert_base_uncased_entropy"],
         },
         "surprisal_vs_entropy_t5": {
             **bay_cfg,
-            "predictors": ["t5_surprisal", "t5_entropy"],
+            "predictors": ["t5_base_surprisal", "t5_base_entropy"],
         },
         # H6 + full comparison
         "full": bay_cfg,

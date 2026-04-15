@@ -76,10 +76,11 @@ bayesian:
   predictors:
     - ngram_surprisal
     - gpt2_surprisal
-    - bert_surprisal
-    - t5_surprisal
+    - bert_base_uncased_surprisal
+    - t5_base_surprisal
     - gpt2_entropy
-    - bert_entropy
+    - bert_base_uncased_entropy
+    - t5_base_entropy
     - integration_cost
   random_slopes:
     - gpt2_surprisal
