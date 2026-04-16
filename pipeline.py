@@ -395,6 +395,11 @@ def main() -> None:
         if cache.exists():
             df = pd.read_parquet(cache)
 
+    # Normalise column name: integration_cost.py writes dep_length;
+    # Bayesian config and model variants expect integration_cost.
+    if df is not None and "dep_length" in df.columns and "integration_cost" not in df.columns:
+        df = df.rename(columns={"dep_length": "integration_cost"})
+
     # ── Step 4: Attention analysis (needs dep_length from step 5) ────────────
     if 4 in steps:
         if "dep_length" not in df.columns:
