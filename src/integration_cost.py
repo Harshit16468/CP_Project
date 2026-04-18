@@ -119,7 +119,14 @@ def compute_integration_cost(
     ):
         grp_sorted = grp.sort_values("word_position")
         sent_text  = grp_sorted["sentence_text"].iloc[0]
-        df_words   = grp_sorted["word"].str.lower().tolist()
+        # Use one representative word per position (grp has one row per subject
+        # per word; sending all duplicates to the aligner exhausts parse tokens).
+        unique_words = (
+            grp_sorted
+            .drop_duplicates(subset="word_position")
+            .sort_values("word_position")
+        )
+        df_words = unique_words["word"].str.lower().tolist()
 
         try:
             parse_results = parser.parse(sent_text)
