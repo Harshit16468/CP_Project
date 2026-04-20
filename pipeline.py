@@ -401,12 +401,18 @@ def main() -> None:
         df = df.rename(columns={"dep_length": "integration_cost"})
 
     # ── Step 4: Attention analysis (needs dep_length from step 5) ────────────
+    # Note: after the rename above, the column is "integration_cost";
+    # AttentionAnalyzer reads "dep_length" so pass it back under that name.
     if 4 in steps:
-        if "dep_length" not in df.columns:
-            logger.warning("dep_length not in DataFrame — run step 5 first. "
-                           "Skipping attention analysis.")
+        if "integration_cost" not in df.columns and "dep_length" not in df.columns:
+            logger.warning("integration_cost/dep_length not in DataFrame — "
+                           "run step 5 first. Skipping attention analysis.")
         else:
-            step4_attention(cfg, df)
+            # AttentionAnalyzer expects dep_length column
+            attn_df = df.copy()
+            if "dep_length" not in attn_df.columns and "integration_cost" in attn_df.columns:
+                attn_df = attn_df.rename(columns={"integration_cost": "dep_length"})
+            step4_attention(cfg, attn_df)
 
     # ── Step 6: Bayesian modeling ────────────────────────────────────────────
     if 6 in steps:
