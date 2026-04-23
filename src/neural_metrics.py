@@ -178,10 +178,22 @@ class NeuralMetricsExtractor:
             sentence, return_tensors="pt", truncation=True, max_length=512
         ).to(self.device)
 
-        outputs = self._model(**inputs, output_attentions=True)
-        # attentions: tuple of (1, n_heads, seq, seq) per layer
+        if self.model_type == "seq2seq":
+            # T5: use a minimal decoder so encoder self-attention is available
+            bos = torch.tensor(
+                [[self._model.config.decoder_start_token_id]], device=self.device
+            )
+            outputs = self._model(
+                **inputs, decoder_input_ids=bos, output_attentions=True
+            )
+            # encoder_attentions: tuple of (1, n_heads, seq, seq) per encoder layer
+            attn_source = outputs.encoder_attentions
+        else:
+            outputs = self._model(**inputs, output_attentions=True)
+            attn_source = outputs.attentions
+
         attn = np.stack([a.squeeze(0).cpu().numpy()
-                         for a in outputs.attentions])   # (L, H, T, T)
+                         for a in attn_source])   # (L, H, T, T)
         tokens = self.tokenizer.convert_ids_to_tokens(
             inputs["input_ids"].squeeze().tolist()
         )

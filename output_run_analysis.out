@@ -1,0 +1,58 @@
+INFO  Running hypothesis analyses …
+INFO  Model comparison (LOO-CV):
+                           rank     elpd_loo      p_loo   elpd_diff        weight          se         dse  warning scale
+surprisal_vs_entropy_gpt2     0 -1207.358086  11.572514    0.000000  3.390356e-01  130.928427    0.000000    False   log
+deep_gpt2                     1 -1210.597929  11.545396    3.239843  2.587443e-12  131.014032    3.097620    False   log
+surprisal_vs_entropy_t5       2 -1334.196363   5.033788  126.838278  3.443064e-01  137.919760  189.962925    False   log
+deep_t5                       3 -1338.379512   4.977421  131.021427  0.000000e+00  137.968331  189.999883    False   log
+deep_bert                     4 -1364.587540   5.030268  157.229455  1.507005e-12  138.234106  190.223839    False   log
+surprisal_vs_entropy_bert     5 -1365.011988   5.043685  157.653903  1.680409e-12  138.229084  190.218691    False   log
+baseline                      6 -1371.941032   5.041893  164.582946  2.262736e-12  138.361285  190.294927    False   log
+full                          7 -1388.812390  17.626496  181.454305  3.166580e-01  133.502134  187.194624    False   log
+surprisal_vs_ic               8 -1434.448449  17.319810  227.090363  1.320506e-11  133.743287  187.354362    False   log
+INFO  Hyp 2 — beta_IC: mean=0.001  95%HDI=[0.000, 0.002]  significant=True
+INFO  Architecture comparison:
+                           elpd_loo      p_loo
+Trigram (baseline)     -1371.941032   5.041893
+BERT (bidirectional)   -1364.587540   5.030268
+T5 (encoder-decoder)   -1338.379512   4.977421
+GPT-2 (autoregressive) -1210.597929  11.545396
+INFO  Top 5 heads (gpt2):
+   layer  head       rho  pvalue  n_arcs
+0      5     9  0.350988     0.0  498200
+1      3     4  0.346618     0.0  498200
+2      3     5  0.344070     0.0  498200
+3      6     2  0.342781     0.0  498200
+4      6     3  0.340595     0.0  498200
+INFO  Top 5 heads (bert):
+   layer  head       rho  pvalue  n_arcs
+0      0    10 -0.623803     0.0  498200
+1      1     1 -0.618284     0.0  498200
+2      2     9 -0.584929     0.0  498200
+3      2     0 -0.575558     0.0  498200
+4      4    11 -0.549147     0.0  498200
+INFO  Hyp 6 — sigma_slope_GPT-2 Surprisal: mean=0.012  95%HDI=[0.010, 0.013]  significant=True
+INFO  Hyp 6 — sigma_slope_Integration Cost: mean=0.004  95%HDI=[0.003, 0.006]  significant=True
+INFO  Saved hypothesis summary to /tmp/psycholingu/results/metrics/hypothesis_summary.csv
+INFO  Analysis complete.
+                    model                   predictor    mean  hdi_2.5  hdi_97.5   sig
+                 baseline             ngram_surprisal -0.0014  -0.0020   -0.0009  True
+                deep_gpt2              gpt2_surprisal  0.0107   0.0089    0.0126  True
+                deep_bert bert_base_uncased_surprisal  0.0056   0.0051    0.0061  True
+                  deep_t5           t5_base_surprisal  0.0132   0.0127    0.0138  True
+          surprisal_vs_ic              gpt2_surprisal  0.0115   0.0096    0.0135  True
+          surprisal_vs_ic            integration_cost  0.0014   0.0004    0.0024  True
+surprisal_vs_entropy_gpt2              gpt2_surprisal  0.0083   0.0064    0.0101  True
+surprisal_vs_entropy_gpt2                gpt2_entropy  0.0061   0.0054    0.0069  True
+surprisal_vs_entropy_bert bert_base_uncased_surprisal  0.0052   0.0046    0.0059  True
+surprisal_vs_entropy_bert   bert_base_uncased_entropy  0.0006  -0.0000    0.0013 False
+  surprisal_vs_entropy_t5           t5_base_surprisal  0.0132   0.0127    0.0138  True
+  surprisal_vs_entropy_t5             t5_base_entropy  0.0027   0.0022    0.0033  True
+                     full             ngram_surprisal -0.0002  -0.0009    0.0006 False
+                     full              gpt2_surprisal  0.0076   0.0056    0.0096  True
+                     full bert_base_uncased_surprisal  0.0045   0.0036    0.0054  True
+                     full           t5_base_surprisal  0.0154   0.0146    0.0163  True
+                     full                gpt2_entropy -0.0004  -0.0012    0.0005 False
+                     full   bert_base_uncased_entropy -0.0013  -0.0022   -0.0005  True
+                     full             t5_base_entropy  0.0028   0.0020    0.0035  True
+                     full            integration_cost  0.0010  -0.0000    0.0020 False

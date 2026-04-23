@@ -277,7 +277,7 @@ def step6_bayesian(cfg: dict, df: pd.DataFrame) -> None:
             logger.info("Loading cached Bayesian model: %s", variant_name)
             idata_results[variant_name] = bm.load(nc_path)
             # Load cached LOO if available
-            if loo_path.exists() and bay_cfg.get("compute_loo", False):
+            if bay_cfg.get("compute_loo", False):
                 import pickle
                 pkl = loo_path.with_suffix(".pkl")
                 if pkl.exists():

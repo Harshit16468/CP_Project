@@ -25,6 +25,8 @@ import logging
 from pathlib import Path
 
 import arviz as az
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -76,7 +78,7 @@ def hyp1_deep_vs_ngram() -> None:
     ax.axhline(0, color="gray", linestyle="--", linewidth=0.8)
     plt.tight_layout()
     fig.savefig(FIGURES_DIR / "hyp1_deep_vs_ngram.png", dpi=150)
-    plt.show()
+    plt.close(fig)
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +113,7 @@ def hyp2_ic_variance() -> None:
     ax.legend()
     plt.tight_layout()
     fig.savefig(FIGURES_DIR / "hyp2_ic_variance_explained.png", dpi=150)
-    plt.show()
+    plt.close(fig)
 
 
 # ---------------------------------------------------------------------------
@@ -168,7 +170,7 @@ def hyp3_surprisal_vs_entropy() -> None:
                  fontsize=12, y=1.01)
     plt.tight_layout()
     fig.savefig(FIGURES_DIR / "hyp3_surprisal_vs_entropy.png", dpi=150, bbox_inches="tight")
-    plt.show()
+    plt.close(fig)
 
 
 # ---------------------------------------------------------------------------
@@ -217,7 +219,7 @@ def hyp4_architecture() -> None:
     plt.tight_layout()
     fig.savefig(FIGURES_DIR / "hyp4_architecture_comparison.png", dpi=150)
     logger.info("Architecture comparison:\n%s", arch_comp[["elpd_loo", "p_loo"]].to_string())
-    plt.show()
+    plt.close(fig)
 
 
 # ---------------------------------------------------------------------------
@@ -229,7 +231,7 @@ def hyp5_attention() -> None:
     Visualise top attention heads correlated with dependency length.
     Tests: do specific heads implicitly track syntactic structure?
     """
-    for model_label in ("gpt2", "bert"):
+    for model_label in ("gpt2", "bert", "t5"):
         path = RESULTS_DIR / f"04_attention_{model_label}.csv"
         if not path.exists():
             logger.warning("Attention results not found for %s (run step 4).", model_label)
@@ -238,7 +240,7 @@ def hyp5_attention() -> None:
         df = pd.read_csv(path)
         top_k = df.head(10).copy()
         top_k["label"] = top_k.apply(
-            lambda r: f"L{int(r.layer)}H{int(r.head)}", axis=1
+            lambda r: f"L{int(r['layer'])}H{int(r['head'])}", axis=1
         )
         logger.info("Top 5 heads (%s):\n%s", model_label, df.head(5).to_string())
 
@@ -253,7 +255,32 @@ def hyp5_attention() -> None:
         )
         plt.tight_layout()
         fig.savefig(FIGURES_DIR / f"hyp5_attention_{model_label}.png", dpi=150)
-        plt.show()
+        plt.close(fig)
+
+    # Combined cross-architecture comparison: top-1 head per model
+    records = []
+    for model_label in ("gpt2", "bert", "t5"):
+        path = RESULTS_DIR / f"04_attention_{model_label}.csv"
+        if not path.exists():
+            continue
+        row = pd.read_csv(path).iloc[0]
+        records.append({
+            "model": model_label.upper(),
+            "label": f"L{int(row['layer'])}H{int(row['head'])}",
+            "rho":   row["rho"],
+        })
+    if records:
+        comp = pd.DataFrame(records)
+        comp["display"] = comp["model"] + " " + comp["label"]
+        fig, ax = plt.subplots(figsize=(7, 3))
+        colors = ["steelblue" if r >= 0 else "tomato" for r in comp["rho"]]
+        ax.barh(comp["display"], comp["rho"].abs(), color=colors, edgecolor="white")
+        ax.set_xlabel("|Spearman ρ| with Dependency Length")
+        ax.set_title("Hyp 5: Best Attention Head per Architecture")
+        plt.tight_layout()
+        fig.savefig(FIGURES_DIR / "hyp5_attention_comparison.png", dpi=150)
+        logger.info("Saved cross-architecture attention comparison.")
+        plt.close(fig)
 
 
 # ---------------------------------------------------------------------------
@@ -333,7 +360,7 @@ def hyp6_random_slopes() -> None:
         plt.tight_layout()
         safe_label = label.lower().replace(" ", "_")
         fig.savefig(FIGURES_DIR / f"hyp6_random_slopes_{safe_label}.png", dpi=150)
-        plt.show()
+        plt.close(fig)
 
 
 # ---------------------------------------------------------------------------

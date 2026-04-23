@@ -58,7 +58,7 @@ models:
 # Attention analysis
 # ----------------------------------------------------------------
 attention:
-  models: [gpt2, bert]           # models to extract heads from
+  models: [gpt2, bert, t5]       # models to extract heads from
   layers: all                     # "all" or list of layer indices
   correlation_method: spearman
 
@@ -90,10 +90,10 @@ bayesian:
   min_rt_ms: 100
   max_rt_ms: 3000
   # PyMC sampler settings
-  # max_obs: 50000            # uncomment to subsample (e.g. when testing)
+  max_obs: 50000              # subsample for faster MCMC mixing
   compute_loo: true
   draws: 2000
-  tune: 1000
+  tune: 2000
   chains: 4
   target_accept: 0.9
   random_seed: 42
