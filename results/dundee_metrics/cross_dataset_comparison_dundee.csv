@@ -1,0 +1,25 @@
+corpus,variant,predictor,mean,hdi_2.5,hdi_97.5,sig
+Natural Stories,surprisal_vs_ic,gpt2_surprisal,0.0144,0.0113,0.0176,True
+Natural Stories,surprisal_vs_ic,integration_cost,-0.0006,-0.003,0.0017,False
+Dundee,surprisal_vs_ic,gpt2_surprisal,0.13,0.1093,0.152,True
+Dundee,surprisal_vs_ic,integration_cost,0.0189,0.0011,0.0371,True
+Natural Stories,surprisal_vs_entropy_gpt2,gpt2_surprisal,0.0079,0.0049,0.0109,True
+Natural Stories,surprisal_vs_entropy_gpt2,gpt2_entropy,0.0051,0.0027,0.0076,True
+Dundee,surprisal_vs_entropy_gpt2,gpt2_surprisal,0.1008,0.0786,0.1248,True
+Dundee,surprisal_vs_entropy_gpt2,gpt2_entropy,0.0248,0.0117,0.0381,True
+Natural Stories,full,ngram_surprisal,0.0008,-0.0015,0.0031,False
+Natural Stories,full,gpt2_surprisal,0.0098,0.0065,0.0131,True
+Natural Stories,full,bert_base_uncased_surprisal,0.0061,0.0032,0.0091,True
+Natural Stories,full,t5_base_surprisal,0.0181,0.0155,0.0207,True
+Natural Stories,full,gpt2_entropy,-0.0013,-0.004,0.0015,False
+Natural Stories,full,bert_base_uncased_entropy,-0.0017,-0.0046,0.0013,False
+Natural Stories,full,t5_base_entropy,0.002,-0.0003,0.0043,False
+Natural Stories,full,integration_cost,-0.0013,-0.0037,0.0011,False
+Dundee,full,ngram_surprisal,0.0141,-0.0012,0.0301,False
+Dundee,full,gpt2_surprisal,0.1055,0.0854,0.1259,True
+Dundee,full,bert_base_uncased_surprisal,0.0689,0.0519,0.0859,True
+Dundee,full,t5_base_surprisal,-0.0326,-0.0491,-0.0162,True
+Dundee,full,gpt2_entropy,0.0121,-0.0053,0.0286,False
+Dundee,full,bert_base_uncased_entropy,0.0976,0.0821,0.1142,True
+Dundee,full,t5_base_entropy,0.023,0.0076,0.0382,True
+Dundee,full,integration_cost,0.0102,-0.0069,0.0278,False

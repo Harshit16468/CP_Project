@@ -1,0 +1,10 @@
+model,max_rhat,min_ess_bulk,min_ess_tail,n_divergences,status
+baseline,1.2452,13.0,39.0,0,NEEDS_REFIT
+deep_bert,1.1727,19.0,50.0,0,NEEDS_REFIT
+deep_gpt2,1.1676,16.0,28.0,0,NEEDS_REFIT
+deep_t5,1.2474,13.0,55.0,0,NEEDS_REFIT
+full,1.1393,23.0,63.0,0,NEEDS_REFIT
+surprisal_vs_entropy_bert,1.1952,14.0,58.0,0,NEEDS_REFIT
+surprisal_vs_entropy_gpt2,1.09,34.0,64.0,0,NEEDS_REFIT
+surprisal_vs_entropy_t5,1.1522,22.0,90.0,0,NEEDS_REFIT
+surprisal_vs_ic,1.1416,27.0,81.0,0,NEEDS_REFIT

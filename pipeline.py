@@ -50,13 +50,12 @@ import yaml
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
 
-from src.data_prep          import load_dataset
-from src.ngram_surprisal    import build_ngram_model, compute_ngram_surprisal
-from src.neural_metrics     import NeuralMetricsExtractor
+from src.data_prep       import load_dataset
+from src.ngram_surprisal import build_ngram_model, compute_ngram_surprisal
+from src.neural_metrics  import NeuralMetricsExtractor
 from src.attention_analysis import AttentionAnalyzer
 from src.integration_cost   import build_parser, compute_integration_cost
-from src.bayesian_model     import BayesianHierarchicalModel
-from src.lexical_features   import add_lexical_controls
+from src.bayesian_model      import BayesianHierarchicalModel
 
 logging.basicConfig(
     level=logging.INFO,
@@ -201,21 +200,6 @@ def step4_attention(
     return results
 
 
-def step_lexical_derived(cfg: dict, df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Add psycholinguistic control variables (cached as 03b_lexical_derived.parquet).
-    Runs automatically after step 3; no --steps flag needed.
-    """
-    cache = cache_path(cfg, "03b_lexical_derived.parquet")
-    if cache.exists():
-        logger.info("Loading cached lexical/derived features from %s", cache)
-        return pd.read_parquet(cache)
-    df = add_lexical_controls(df, cfg)
-    df.to_parquet(cache, index=True)
-    logger.info("Cached lexical/derived features to %s", cache)
-    return df
-
-
 def step5_integration_cost(cfg: dict, df: pd.DataFrame) -> pd.DataFrame:
     logger.info("=" * 60)
     logger.info("STEP 5 — Integration Cost (UD Dependency Parsing)")
@@ -281,43 +265,6 @@ def step6_bayesian(cfg: dict, df: pd.DataFrame) -> None:
         },
         # H6 + full comparison
         "full": bay_cfg,
-        # ── Psycholinguistics controls (H1–H3 with frequency/length/spillover) ─
-        # Lexical baseline: are frequency and length sufficient?
-        "controls_only": {
-            **bay_cfg,
-            "predictors": ["log_freq", "word_length"],
-            "random_slopes": [],
-        },
-        # H1 with controls: does surprisal add beyond frequency + length?
-        "gpt2_controls": {
-            **bay_cfg,
-            "predictors": ["gpt2_surprisal", "log_freq", "word_length"],
-            "random_slopes": ["gpt2_surprisal"],
-        },
-        # Spillover: does N-1 surprisal independently predict RT at N?
-        "spillover": {
-            **bay_cfg,
-            "predictors": ["gpt2_surprisal", "gpt2_surprisal_lag1",
-                           "log_freq", "word_length"],
-            "random_slopes": ["gpt2_surprisal"],
-        },
-        # Entropy reduction vs surprisal: which account fits better?
-        "entropy_reduction": {
-            **bay_cfg,
-            "predictors": ["gpt2_surprisal", "gpt2_entropy_reduction",
-                           "log_freq", "word_length"],
-            "random_slopes": ["gpt2_surprisal"],
-        },
-        # Full psycholinguistic model: all controls + IC + spillover
-        "full_psycholing": {
-            **bay_cfg,
-            "predictors": [
-                "gpt2_surprisal", "gpt2_surprisal_lag1",
-                "integration_cost", "gpt2_entropy_reduction",
-                "log_freq", "word_length",
-            ],
-            "random_slopes": ["gpt2_surprisal", "integration_cost"],
-        },
     }
 
     idata_results = {}
@@ -439,11 +386,6 @@ def main() -> None:
         cache = cache_path(cfg, "03_neural_metrics.parquet")
         if cache.exists():
             df = pd.read_parquet(cache)
-
-    # ── Derived features (auto after step 3): word_length, log_freq, ─────────
-    # ── spillover (surprisal_lag1), entropy reduction (ΔH) ───────────────────
-    if df is not None:
-        df = step_lexical_derived(cfg, df)
 
     # ── Step 5: Integration cost (runs before step 4 — 4 needs dep_length) ───
     if 5 in steps:

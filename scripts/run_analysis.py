@@ -36,6 +36,10 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
 
 RESULTS_DIR = Path("results/metrics")
 FIGURES_DIR = Path("results/figures")
+PREFIX      = "06"   # NS uses "06_bayes_*.nc" / "06_model_comparison.csv";
+                     # GECO uses "geco_bayes_*.nc" / "geco_model_comparison.csv"
+                     # Dundee uses "dundee_bayes_*.nc" / "dundee_model_comparison.csv"
+DATASET_LABEL = ""   # appears in plot titles when running on a non-NS dataset
 
 
 # ---------------------------------------------------------------------------
@@ -43,7 +47,7 @@ FIGURES_DIR = Path("results/figures")
 # ---------------------------------------------------------------------------
 
 def load_idata(variant: str) -> az.InferenceData | None:
-    path = RESULTS_DIR / f"06_bayes_{variant}.nc"
+    path = RESULTS_DIR / f"{PREFIX}_bayes_{variant}.nc"
     if not path.exists():
         logger.warning("Not found (run pipeline first): %s", path)
         return None
@@ -62,7 +66,7 @@ def posterior_mean_ci(idata: az.InferenceData, var: str) -> tuple[float, float, 
 
 def hyp1_deep_vs_ngram() -> None:
     """Compare baseline (trigram) vs. GPT-2 model fit via LOO-CV."""
-    comparison_path = RESULTS_DIR / "06_model_comparison.csv"
+    comparison_path = RESULTS_DIR / f"{PREFIX}_model_comparison.csv"
     if not comparison_path.exists():
         logger.warning("Model comparison table not found. Run step 6 first.")
         return
@@ -130,9 +134,9 @@ def hyp3_surprisal_vs_entropy() -> None:
         ("gpt2", "surprisal_vs_entropy_gpt2",
          "beta_gpt2_surprisal", "beta_gpt2_entropy"),
         ("bert", "surprisal_vs_entropy_bert",
-         "beta_bert_surprisal", "beta_bert_entropy"),
+         "beta_bert_base_uncased_surprisal", "beta_bert_base_uncased_entropy"),
         ("t5",   "surprisal_vs_entropy_t5",
-         "beta_t5_surprisal",  "beta_t5_entropy"),
+         "beta_t5_base_surprisal",  "beta_t5_base_entropy"),
     ]
 
     fig, axes = plt.subplots(3, 2, figsize=(12, 10))
@@ -183,7 +187,7 @@ def hyp4_architecture() -> None:
     Tests: does autoregressive (GPT-2) fit reading times better than
     bidirectional (BERT) or encoder-decoder (T5)?
     """
-    comparison_path = RESULTS_DIR / "06_model_comparison.csv"
+    comparison_path = RESULTS_DIR / f"{PREFIX}_model_comparison.csv"
     if not comparison_path.exists():
         logger.warning("Model comparison table not found. Run step 6 first.")
         return
@@ -390,9 +394,10 @@ def write_summary_table() -> None:
 
     if rows:
         out = pd.DataFrame(rows)
-        out.to_csv(RESULTS_DIR / "hypothesis_summary.csv", index=False)
-        logger.info("Saved hypothesis summary to %s",
-                    RESULTS_DIR / "hypothesis_summary.csv")
+        out_path = RESULTS_DIR / f"{PREFIX}_hypothesis_summary.csv" if PREFIX != "06" \
+                   else RESULTS_DIR / "hypothesis_summary.csv"
+        out.to_csv(out_path, index=False)
+        logger.info("Saved hypothesis summary to %s", out_path)
         print(out.to_string(index=False))
 
 
@@ -403,20 +408,32 @@ def write_summary_table() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results", default="results/metrics",
-                        help="Path to results directory")
+                        help="Path to results directory containing the .nc files")
+    parser.add_argument("--figures", default=None,
+                        help="Path to write figures (default: <results>/../figures)")
+    parser.add_argument("--prefix", default="06",
+                        help="File prefix: '06' for Natural Stories, "
+                             "'geco' for GECO, 'dundee' for Dundee")
+    parser.add_argument("--label", default="",
+                        help="Dataset label appearing in plot titles (e.g. 'GECO').")
+    parser.add_argument("--skip-h5", action="store_true",
+                        help="Skip H5 attention plots (NS-only data — set this for GECO/Dundee).")
     args = parser.parse_args()
 
-    global RESULTS_DIR, FIGURES_DIR
+    global RESULTS_DIR, FIGURES_DIR, PREFIX, DATASET_LABEL
     RESULTS_DIR = Path(args.results)
-    FIGURES_DIR = RESULTS_DIR.parent / "figures"
+    FIGURES_DIR = Path(args.figures) if args.figures else RESULTS_DIR.parent / "figures"
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    PREFIX        = args.prefix
+    DATASET_LABEL = args.label
 
-    logger.info("Running hypothesis analyses …")
+    logger.info("Running hypothesis analyses (prefix=%s, label=%s) …", PREFIX, DATASET_LABEL or "—")
     hyp1_deep_vs_ngram()           # H1: deep > shallow surprisal
     hyp2_ic_variance()             # H2: IC explained away by surprisal?
     hyp3_surprisal_vs_entropy()    # H3: surprisal & entropy independent (all 3 archs)
     hyp4_architecture()            # H4: GPT-2 vs BERT vs T5
-    hyp5_attention()               # H5: attention heads ↔ dep length
+    if not args.skip_h5:
+        hyp5_attention()           # H5: attention heads ↔ dep length (NS-only)
     hyp6_random_slopes()           # H6: per-reader variance (sigma + slopes)
     write_summary_table()
     logger.info("Analysis complete.")

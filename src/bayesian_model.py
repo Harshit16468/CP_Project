@@ -125,6 +125,12 @@ class BayesianHierarchicalModel:
 
         Fixed effects: intercept + all predictors
         Random effects: per-subject intercept + random slopes for configured predictors
+
+        Intercept prior strategy (controlled by cfg["intercept_prior"]):
+          "weak"  (default) : Normal(mu=0, sigma=1)  — original, causes funnel mixing
+          "data"  (recommended) : Normal(mu=mean(log_rt), sigma=0.1) — tight, data-informed
+                  Pins the intercept near its posterior mode so u0 carries only
+                  residual per-subject variation; eliminates the intercept/u0 funnel.
         """
         log_rt      = data["log_rt"]
         subject_idx = data["subject_idx"]
@@ -132,9 +138,21 @@ class BayesianHierarchicalModel:
         predictors  = data["predictors"]
         rand_slopes = [p for p in self.rand_slopes if p in predictors]
 
+        intercept_prior = self.cfg.get("intercept_prior", "weak")
+        intercept_mu    = float(np.mean(log_rt))  # data mean of log(RT)
+
         with pm.Model() as model:
+            # ---- Intercept prior (tight = data-informed fixes funnel mixing) ---
+            if intercept_prior == "data":
+                # Tight prior centred at the data mean of log(RT).
+                # This breaks the intercept ↔ u0 non-identifiability without
+                # introducing informative beliefs about effect sizes.
+                intercept = pm.Normal("intercept", mu=intercept_mu, sigma=0.1)
+            else:
+                # Original weak prior — kept for reproducibility of earlier runs
+                intercept = pm.Normal("intercept", mu=0, sigma=1)
+
             # ---- Fixed effects priors ----------------------------------------
-            intercept = pm.Normal("intercept", mu=0, sigma=1)
             beta = {
                 pred: pm.Normal(f"beta_{pred}", mu=0, sigma=1)
                 for pred in predictors
@@ -178,14 +196,20 @@ class BayesianHierarchicalModel:
     def fit(self, df: pd.DataFrame) -> az.InferenceData:
         """
         Fit the model and return an ArviZ InferenceData object.
+
+        Sampler init is controlled by cfg["init"]:
+          "jitter+adapt_diag"  (default) — standard NUTS init
+          "advi+adapt_diag"              — ADVI warm-start; better for funnel geometry
         """
+        init_method = self.cfg.get("init", "jitter+adapt_diag")
         data       = self._prepare_data(df)
         self._last_data = data          # needed for subsampled LOO
         pymc_model = self._build_model(data)
 
         logger.info(
-            "Sampling: %d draws, %d tune, %d chains (target_accept=%.2f) …",
+            "Sampling: %d draws, %d tune, %d chains (target_accept=%.2f, init=%s, intercept_prior=%s) …",
             self.draws, self.tune, self.chains, self.target_acc,
+            init_method, self.cfg.get("intercept_prior", "weak"),
         )
         with pymc_model:
             idata = pm.sample(
@@ -194,6 +218,7 @@ class BayesianHierarchicalModel:
                 chains=self.chains,
                 cores=self.chains,   # one core per chain — parallel sampling
                 target_accept=self.target_acc,
+                init=init_method,
                 random_seed=self.seed,
                 progressbar=True,
                 return_inferencedata=True,

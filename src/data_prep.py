@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 def load_dataset(
-    dataset: Literal["natural_stories", "geco"],
+    dataset: Literal["natural_stories", "geco", "dundee"],
     cfg: dict,
 ) -> pd.DataFrame:
     """
@@ -45,7 +45,7 @@ def load_dataset(
     Parameters
     ----------
     dataset : str
-        One of ``"natural_stories"`` or ``"geco"``.
+        One of ``"natural_stories"``, ``"geco"``, or ``"dundee"``.
     cfg : dict
         Top-level config dict (loaded from config.yaml).
 
@@ -58,6 +58,8 @@ def load_dataset(
         df = _load_natural_stories(cfg)
     elif dataset == "geco":
         df = _load_geco(cfg)
+    elif dataset == "dundee":
+        df = _load_dundee(cfg)
     else:
         raise ValueError(f"Unknown dataset: {dataset!r}")
 
@@ -184,6 +186,10 @@ def _load_geco(cfg: dict) -> pd.DataFrame:
     Parse the GECO corpus Excel files.
     EnglishMaterial.xlsx  – word text + positions
     L1ReadingData.xlsx    – first fixation / total reading time per participant
+
+    Columns produced match the Natural Stories schema:
+      subject, story_id, sentence_id, word_position (0-based within sentence),
+      word, rt_ms, sentence_text
     """
     geco_cfg    = cfg["geco"]
     words_path  = Path(geco_cfg["words_file"])
@@ -195,28 +201,299 @@ def _load_geco(cfg: dict) -> pd.DataFrame:
     words = pd.read_excel(words_path)
     rts   = pd.read_excel(rt_path)
 
-    # GECO canonical columns
-    words = words.rename(columns={
-        "WORD":         "word",
-        "WORD_ID":      "word_id",
-        "SENTENCE_ID":  "sentence_id",
-        "PART":         "story_id",
-    })
-    words["word"] = words["word"].str.lower().str.strip()
+    # GECO release format:
+    #   WORD_ID     = "PART-SENTENCE-WORDPOSITION"  (e.g. "1-5-1")
+    #   SENTENCE_ID = "PART-SENTENCE"               (e.g. "1-1")
+    #   PP_NR       = "pp01" ... (string)
+    #   RT column   = WORD_TOTAL_READING_TIME       (object dtype; "." marks skipped)
 
-    rts = rts.rename(columns={
-        "PP_NR":         "subject",
-        "WORD_ID":       "word_id",
-        "TOTAL_READING_TIME": "rt_ms",
-    })
+    # ── Material: parse compound WORD_ID into numeric story / sentence / position ─
+    if "WORD_ID" not in words.columns:
+        raise ValueError(f"GECO material missing WORD_ID. Cols: {list(words.columns)}")
+
+    parts = words["WORD_ID"].astype(str).str.split("-", expand=True)
+    if parts.shape[1] < 3:
+        raise ValueError(
+            f"Expected WORD_ID format 'PART-SENTENCE-POSITION', got: {words['WORD_ID'].head().tolist()}"
+        )
+    words["story_id"]      = pd.to_numeric(parts[0], errors="coerce")
+    words["sentence_in_p"] = pd.to_numeric(parts[1], errors="coerce")
+    words["word_position"] = pd.to_numeric(parts[2], errors="coerce") - 1   # 0-based
+
+    # Build a globally-unique numeric sentence_id (story * 1e6 + sentence)
+    words["sentence_id"] = (
+        words["story_id"].astype("Int64") * 1_000_000
+        + words["sentence_in_p"].astype("Int64")
+    )
+
+    words["word"]    = words["WORD"].astype(str).str.lower().str.strip()
+    words["word_id"] = words["WORD_ID"].astype(str)            # keep string key for merge
+    words = words.dropna(subset=["story_id", "sentence_id", "word_position"]).copy()
+    words["story_id"]      = words["story_id"].astype(int)
+    words["sentence_id"]   = words["sentence_id"].astype("Int64").astype(int)
+    words["word_position"] = words["word_position"].astype(int)
+
+    # Build sentence_text per sentence_id (Stanza needs raw text in step 5)
+    word_order = (
+        words[["sentence_id", "word_position", "word"]]
+        .sort_values(["sentence_id", "word_position"])
+        .drop_duplicates(subset=["sentence_id", "word_position"])
+    )
+    sent_texts = (
+        word_order.groupby("sentence_id")["word"]
+        .apply(lambda ws: " ".join(ws))
+        .reset_index()
+        .rename(columns={"word": "sentence_text"})
+    )
+    words = words.merge(sent_texts, on="sentence_id", how="left")
+
+    # ── Reading times: pick the right RT column and clean ────────────────────
+    rt_candidates = ["WORD_TOTAL_READING_TIME", "TOTAL_READING_TIME",
+                     "WORD_GAZE_DURATION", "WORD_FIRST_FIXATION_DURATION"]
+    rt_col = next((c for c in rt_candidates if c in rts.columns), None)
+    if rt_col is None:
+        raise ValueError(
+            f"GECO RT file has no recognised RT column. Cols: {list(rts.columns)}"
+        )
+    logger.info("GECO using RT column: %s", rt_col)
+
+    if "PP_NR" not in rts.columns or "WORD_ID" not in rts.columns:
+        raise ValueError(
+            f"GECO RT file missing PP_NR / WORD_ID. Cols: {list(rts.columns)}"
+        )
+
+    rts = rts.rename(columns={"PP_NR": "subject", "WORD_ID": "word_id", rt_col: "rt_ms"})
     rts = rts[["subject", "word_id", "rt_ms"]].copy()
+    rts["word_id"] = rts["word_id"].astype(str)
+
+    # GECO uses "." for skipped/missing fixations — coerce to NaN, drop
     rts["rt_ms"] = pd.to_numeric(rts["rt_ms"], errors="coerce")
     rts.dropna(subset=["rt_ms"], inplace=True)
+    rts = rts[rts["rt_ms"] > 0]
 
-    df = pd.merge(rts, words, on="word_id", how="inner")
-    df["word_position"] = df.groupby(["subject", "sentence_id"]).cumcount()
+    # ── Merge RTs with material on string WORD_ID ────────────────────────────
+    keep_cols = ["word_id", "sentence_id", "story_id",
+                 "word", "word_position", "sentence_text"]
+    df = pd.merge(rts, words[keep_cols].drop_duplicates(subset=["word_id"]),
+                  on="word_id", how="inner")
 
+    logger.info(
+        "GECO loaded: %d observations, %d subjects, %d sentences",
+        len(df), df["subject"].nunique(), df["sentence_id"].nunique(),
+    )
     return df
+
+
+# ---------------------------------------------------------------------------
+# Dundee Corpus
+# ---------------------------------------------------------------------------
+
+def _load_dundee(cfg: dict) -> pd.DataFrame:
+    """
+    Parse the Dundee Corpus eye-tracking data.
+
+    ⚠  ACCESS: Dundee requires institutional licensing.
+       Request from the original authors or an LDC consortium.
+       Reference: Kennedy, A. & Pynte, J. (2005). Parafoveal-on-foveal effects
+       in normal reading. Vision Research, 45(2), 153-168.
+
+    Expected files (set paths in config.yaml under dundee:)
+      data_dir   : directory containing the per-article .dat files (sa_ukb*.dat)
+                   OR a single merged TSV with all data
+
+    Standard Dundee column names (tab-separated per-word lines):
+      WORD        – word surface form
+      WNUM        – word index within text (1-based)
+      SNUM        – sentence index within text (1-based)
+      TNUM        – text (article) number 1-20
+      FDURP       – first-fixation duration (prior fixation; often skipped)
+      FDURS       – first-fixation duration (single fixation only)
+      GDUR        – gaze duration  ← primary RT measure used here
+      RPURT       – right-pass (re-reading) duration
+      Subject is encoded in filename (sa, sb, …, sj for 10 subjects)
+      or in a SUBJ column if you have a merged file.
+
+    The loader is flexible: it accepts both the original per-subject files
+    and a single pre-merged TSV (produced by, e.g., dundee_merge.py).
+
+    Columns produced match the pipeline schema:
+      subject, story_id (=TNUM), sentence_id (=SNUM), word_position (0-based),
+      word, rt_ms (=GDUR), sentence_text
+    """
+    dundee_cfg = cfg.get("dundee", {})
+    data_dir   = Path(dundee_cfg.get("data_dir", ""))
+    merged_tsv = dundee_cfg.get("merged_file", "")
+    rt_measure = dundee_cfg.get("rt_measure", "FDUR")   # FDUR | GDUR | FPRT | RPURT
+    treebank_p = Path(dundee_cfg.get("treebank_file", "")) if dundee_cfg.get("treebank_file") else None
+
+    # ── Load data ────────────────────────────────────────────────────────────
+    if merged_tsv and Path(merged_tsv).exists():
+        logger.info("Loading Dundee from merged TSV: %s", merged_tsv)
+        df_raw = pd.read_csv(merged_tsv, sep="\t", low_memory=False)
+    elif data_dir.exists():
+        dfs = []
+        # The released Dundee per-fixation .dat files are whitespace-aligned,
+        # NOT tab-separated. Use a regex separator.
+        # Per-fixation files follow pattern "sXNNma{1|2}p.dat" (subject s[a-j],
+        # text 01..20, pass 1|2). Filter out corpus / treebank text files like
+        # tx01wrdp.dat which are not eye-tracking data.
+        dat_files = sorted(p for p in data_dir.glob("*.dat")
+                           if p.stem.startswith("s") and "ma" in p.stem)
+        if not dat_files:
+            raise FileNotFoundError(
+                f"No subject .dat files found in Dundee data_dir: {data_dir}"
+            )
+        for fpath in dat_files:
+            # subject = first 2 chars of filename (e.g. "sa", "sb", ..., "sj")
+            subject_id = fpath.stem[:2]
+            tmp = None
+            for enc in ("utf-8", "latin-1"):
+                try:
+                    tmp = pd.read_csv(fpath, sep=r"\s+", engine="python",
+                                      on_bad_lines="skip", encoding=enc)
+                    break
+                except (UnicodeDecodeError, Exception) as e:
+                    if enc == "latin-1":
+                        logger.warning("Skipping unreadable file %s: %s", fpath.name, e)
+                    continue
+            if tmp is None:
+                continue
+            # Drop *Blink and other comment / sentinel rows
+            if "WORD" in tmp.columns:
+                tmp = tmp[~tmp["WORD"].astype(str).str.startswith("*")]
+            tmp["subject"] = subject_id
+            tmp["__src_file"] = fpath.name
+            dfs.append(tmp)
+        df_raw = pd.concat(dfs, ignore_index=True)
+        logger.info("Loaded %d Dundee files, %d raw fixation rows total",
+                    len(dat_files), len(df_raw))
+    else:
+        raise FileNotFoundError(
+            "Dundee data not found.  Set dundee.data_dir or dundee.merged_file "
+            "in config.yaml.  Obtain the corpus via institutional licensing."
+        )
+
+    # ── Normalise column names ────────────────────────────────────────────────
+    col_map = {
+        "WORD": "word",
+        "WNUM": "word_id",
+        "SNUM": "sentence_id",   # only present in some Dundee releases
+        "TNUM": "story_id",
+        "TEXT": "story_id",      # released per-fixation files use TEXT
+        "SUBJ": "subject",
+        rt_measure: "rt_ms",
+    }
+    df_raw = df_raw.rename(columns={k: v for k, v in col_map.items() if k in df_raw.columns})
+
+    if "rt_ms" not in df_raw.columns:
+        # Fallback: any duration-looking column
+        for cand in ("FDUR", "GDUR", "FPRT", "RPURT", "TFD"):
+            if cand in df_raw.columns:
+                df_raw = df_raw.rename(columns={cand: "rt_ms"})
+                logger.info("Dundee using fallback RT column: %s", cand)
+                break
+
+    # ── Per-fixation → per-word: aggregate fixations to total fixation time ──
+    # Released .dat files are PER FIXATION; the same word can appear many times.
+    # We aggregate sum(rt_ms) across all fixations per (subject, story, word) =
+    # total fixation duration (TFD), the standard eye-tracking RT measure that
+    # is most comparable to GECO's WORD_TOTAL_READING_TIME and to self-paced RTs.
+    needed = {"subject", "story_id", "word_id", "word", "rt_ms"}
+    missing = needed - set(df_raw.columns)
+    if missing:
+        raise ValueError(
+            f"Dundee loader: missing columns after rename: {missing}. "
+            f"Available columns: {list(df_raw.columns)}"
+        )
+
+    for col in ("word_id", "story_id"):
+        df_raw[col] = pd.to_numeric(df_raw[col], errors="coerce")
+    df_raw["rt_ms"] = pd.to_numeric(df_raw["rt_ms"], errors="coerce")
+    df_raw = df_raw[(df_raw["rt_ms"] > 0)
+                    & df_raw["word_id"].notna()
+                    & df_raw["story_id"].notna()
+                    & (df_raw["word_id"] > 0)
+                    & (df_raw["story_id"] > 0)].copy()
+    df_raw["word_id"]  = df_raw["word_id"].astype(int)
+    df_raw["story_id"] = df_raw["story_id"].astype(int)
+    df_raw["word"]     = df_raw["word"].astype(str).str.lower().str.strip()
+
+    # Aggregate fixations → per-word total fixation duration
+    df_raw = (
+        df_raw.groupby(["subject", "story_id", "word_id"], as_index=False)
+              .agg(rt_ms=("rt_ms", "sum"),
+                   word=("word", "first"))
+    )
+    logger.info("After per-word aggregation: %d observations, %d subjects",
+                len(df_raw), df_raw["subject"].nunique())
+
+    # ── Sentence ID assignment ──────────────────────────────────────────────
+    # If the loaded files don't have SNUM, look up sentence IDs from the
+    # Dundee Treebank (TLT2015) which provides (Itemno, WNUM) → SentenceID.
+    if "sentence_id" not in df_raw.columns or df_raw["sentence_id"].isna().any():
+        # Try to find the treebank file automatically if not configured
+        if treebank_p is None or not treebank_p.exists():
+            auto = data_dir / "TLT2015" / "TheDundeeTreebank_v1-0.csv"
+            if auto.exists():
+                treebank_p = auto
+        if treebank_p is not None and treebank_p.exists():
+            logger.info("Joining sentence IDs from treebank: %s", treebank_p)
+            tb = pd.read_csv(treebank_p, sep="\t")
+            tb = tb.rename(columns={"Itemno": "story_id",
+                                    "WNUM":   "word_id",
+                                    "SentenceID": "_sent"})
+            tb = tb[["story_id", "word_id", "_sent"]].drop_duplicates(
+                subset=["story_id", "word_id"]
+            )
+            df_raw = df_raw.merge(tb, on=["story_id", "word_id"], how="left")
+            # Globally unique sentence_id = story * 1e6 + sentence
+            df_raw["sentence_id"] = (
+                df_raw["story_id"].astype("Int64") * 1_000_000
+                + df_raw["_sent"].astype("Int64")
+            )
+            df_raw = df_raw.drop(columns=["_sent"])
+        else:
+            # Fallback: each text becomes one giant sentence
+            logger.warning("No SNUM and no treebank — each text treated as a single sentence.")
+            df_raw["sentence_id"] = df_raw["story_id"] * 1_000_000
+
+    df_raw = df_raw.dropna(subset=["sentence_id"]).copy()
+    df_raw["sentence_id"] = df_raw["sentence_id"].astype("Int64").astype(int)
+
+    # ── Build sentence_text ──────────────────────────────────────────────────
+    word_order = (
+        df_raw[["story_id", "sentence_id", "word_id", "word"]]
+        .drop_duplicates(subset=["story_id", "sentence_id", "word_id"])
+        .sort_values(["story_id", "sentence_id", "word_id"])
+    )
+    sent_texts = (
+        word_order
+        .groupby(["story_id", "sentence_id"])["word"]
+        .apply(lambda ws: " ".join(ws))
+        .reset_index()
+        .rename(columns={"word": "sentence_text"})
+    )
+    df_raw = df_raw.merge(sent_texts, on=["story_id", "sentence_id"], how="left")
+
+    # ── word_position: 0-based rank of word_id within sentence ──────────────
+    # Must rank-by-word_id (NOT cumcount of rows) so the same word gets the same
+    # position across all subjects — neural_metrics aligns metrics to
+    # sentence_text by word_position, and sentence_text contains one entry per
+    # unique word.
+    df_raw = df_raw.sort_values(["story_id", "sentence_id", "word_id"])
+    df_raw["word_position"] = (
+        df_raw.groupby(["story_id", "sentence_id"])["word_id"]
+              .rank(method="dense").astype(int) - 1
+    )
+
+    logger.info(
+        "Dundee loaded: %d observations, %d subjects, %d texts, %d sentences",
+        len(df_raw),
+        df_raw["subject"].nunique(),
+        df_raw["story_id"].nunique(),
+        df_raw["sentence_id"].nunique(),
+    )
+    return df_raw
 
 
 # ---------------------------------------------------------------------------

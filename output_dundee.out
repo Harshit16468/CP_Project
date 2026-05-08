@@ -1,0 +1,413 @@
+==========================================
+SLURM_JOB_ID = 2620838
+SLURM_NODELIST = gnode061
+SLURM_JOB_GPUS = 1
+==========================================
+Time at entrypoint: Fri May  8 08:13:16 PM IST 2026
+Working directory: /home2/ishaan.romil/Psycho_Sanchit
+Node: gnode061
+--- Step 1-3: Data prep + N-gram + Neural metrics --- Fri May  8 08:13:16 PM IST 2026
+20:13:30  INFO      dundee_validation — Running Dundee validation — steps: [1, 2, 3]
+20:13:30  INFO      dundee_validation — Step 1 — Loading Dundee data
+20:13:41  INFO      src.data_prep — Loaded 400 Dundee files, 1026128 raw fixation rows total
+20:13:42  INFO      src.data_prep — After per-word aggregation: 76542 observations, 10 subjects
+20:13:42  INFO      src.data_prep — Joining sentence IDs from treebank: /home2/ishaan.romil/Psycho_Sanchit/dundee/TLT2015/TheDundeeTreebank_v1-0.csv
+20:13:42  INFO      src.data_prep — Dundee loaded: 28573 observations, 10 subjects, 20 texts, 221 sentences
+20:13:42  INFO      src.data_prep — Exclusions: 28573 → 16571 rows (removed 12002)
+20:13:42  INFO      src.data_prep — Dataset ready: 16571 word tokens, 10 subjects
+20:13:42  INFO      dundee_validation — Step 2 — N-gram surprisal
+20:13:42  INFO      src.ngram_surprisal — Loading background corpus from /home2/ishaan.romil/Psycho_Sanchit/data_shared/ngram_corpus.txt …
+20:13:42  INFO      src.ngram_surprisal — Tokenised 10969 sentences from background corpus.
+20:13:42  INFO      src.ngram_surprisal — Training 3-gram KN model on 10969 sentences …
+20:13:46  INFO      src.ngram_surprisal — N-gram model trained (vocab size ≈ 15729)
+20:13:47  INFO      src.ngram_surprisal — Cached n-gram model to /tmp/psycholingu_dundee/processed/ngram_model.pkl
+20:13:47  INFO      src.ngram_surprisal — Computing n-gram surprisal for 20 stories …
+20:14:18  INFO      src.ngram_surprisal — N-gram surprisal computed (mean=18.404 bits, missing=0)
+20:14:18  INFO      dundee_validation — Step 3 — Neural surprisal & entropy
+20:14:18  INFO      dundee_validation —   model: gpt2
+20:14:19  INFO      src.neural_metrics — Loading gpt2 (causal) on cuda …
+20:14:20  INFO      httpx — HTTP Request: HEAD https://huggingface.co/gpt2/resolve/main/config.json "HTTP/1.1 200 OK"
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+20:14:20  WARNING   huggingface_hub.utils._http — Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+20:14:20  INFO      httpx — HTTP Request: HEAD https://huggingface.co/gpt2/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+20:14:20  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/gpt2/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+20:14:21  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/openai-community/gpt2/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+20:14:21  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/gpt2/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+20:14:21  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/openai-community/gpt2/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+20:14:22  INFO      httpx — HTTP Request: HEAD https://huggingface.co/gpt2/resolve/main/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 3730.02it/s]
+20:14:22  INFO      httpx — HTTP Request: HEAD https://huggingface.co/gpt2/resolve/main/generation_config.json "HTTP/1.1 200 OK"
+gpt2 metrics:   0%|          | 0/216 [00:00<?, ?sent/s]gpt2 metrics:   0%|          | 1/216 [00:00<00:50,  4.29sent/s]gpt2 metrics:   4%|▎         | 8/216 [00:00<00:08, 24.49sent/s]gpt2 metrics:   7%|▋         | 16/216 [00:00<00:04, 40.26sent/s]gpt2 metrics:  11%|█         | 24/216 [00:00<00:03, 50.80sent/s]gpt2 metrics:  15%|█▍        | 32/216 [00:00<00:03, 57.59sent/s]gpt2 metrics:  19%|█▊        | 40/216 [00:00<00:02, 62.49sent/s]gpt2 metrics:  22%|██▏       | 48/216 [00:00<00:02, 65.45sent/s]gpt2 metrics:  25%|██▌       | 55/216 [00:01<00:02, 65.18sent/s]gpt2 metrics:  29%|██▊       | 62/216 [00:01<00:02, 63.16sent/s]gpt2 metrics:  32%|███▏      | 69/216 [00:01<00:02, 64.77sent/s]gpt2 metrics:  35%|███▌      | 76/216 [00:01<00:02, 65.78sent/s]gpt2 metrics:  38%|███▊      | 83/216 [00:01<00:02, 61.68sent/s]gpt2 metrics:  42%|████▏     | 90/216 [00:01<00:01, 63.65sent/s]gpt2 metrics:  45%|████▌     | 98/216 [00:01<00:01, 66.48sent/s]gpt2 metrics:  49%|████▊     | 105/216 [00:01<00:01, 62.98sent/s]gpt2 metrics:  52%|█████▏    | 113/216 [00:01<00:01, 65.28sent/s]gpt2 metrics:  56%|█████▌    | 120/216 [00:02<00:01, 64.82sent/s]gpt2 metrics:  60%|█████▉    | 129/216 [00:02<00:01, 67.85sent/s]gpt2 metrics:  63%|██████▎   | 136/216 [00:02<00:01, 66.54sent/s]gpt2 metrics:  67%|██████▋   | 144/216 [00:02<00:01, 69.29sent/s]gpt2 metrics:  70%|███████   | 152/216 [00:02<00:00, 69.23sent/s]gpt2 metrics:  74%|███████▎  | 159/216 [00:02<00:00, 67.48sent/s]gpt2 metrics:  77%|███████▋  | 167/216 [00:02<00:00, 69.43sent/s]gpt2 metrics:  81%|████████  | 174/216 [00:02<00:00, 68.15sent/s]gpt2 metrics:  84%|████████▍ | 182/216 [00:02<00:00, 69.75sent/s]gpt2 metrics:  88%|████████▊ | 189/216 [00:03<00:00, 69.15sent/s]gpt2 metrics:  91%|█████████ | 196/216 [00:03<00:00, 68.04sent/s]gpt2 metrics:  94%|█████████▍| 203/216 [00:03<00:00, 68.04sent/s]gpt2 metrics:  97%|█████████▋| 210/216 [00:03<00:00, 65.76sent/s]gpt2 metrics: 100%|██████████| 216/216 [00:03<00:00, 62.05sent/s]
+20:14:26  INFO      src.neural_metrics — gpt2: surprisal mean=20.045 bits, entropy mean=7.974 bits
+20:14:26  INFO      dundee_validation —   model: bert-base-uncased
+20:14:26  INFO      src.neural_metrics — Loading bert-base-uncased (masked) on cuda …
+20:14:26  INFO      httpx — HTTP Request: HEAD https://huggingface.co/bert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+20:14:27  INFO      httpx — HTTP Request: HEAD https://huggingface.co/bert-base-uncased/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+20:14:27  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/bert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+20:14:27  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/google-bert/bert-base-uncased/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+20:14:27  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/bert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+20:14:28  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/google-bert/bert-base-uncased/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+20:14:28  INFO      httpx — HTTP Request: HEAD https://huggingface.co/bert-base-uncased/resolve/main/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%|          | 0/202 [00:00<?, ?it/s]Loading weights: 100%|██████████| 202/202 [00:00<00:00, 3904.63it/s]
+[transformers] [1mBertForMaskedLM LOAD REPORT[0m from: bert-base-uncased
+Key                         | Status     |  | 
+----------------------------+------------+--+-
+cls.seq_relationship.bias   | UNEXPECTED |  | 
+bert.pooler.dense.weight    | UNEXPECTED |  | 
+cls.seq_relationship.weight | UNEXPECTED |  | 
+bert.pooler.dense.bias      | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+bert-base-uncased metrics:   0%|          | 0/216 [00:00<?, ?sent/s]bert-base-uncased metrics:   0%|          | 1/216 [00:00<00:36,  5.87sent/s]bert-base-uncased metrics:   1%|          | 2/216 [00:00<00:47,  4.53sent/s]bert-base-uncased metrics:   1%|▏         | 3/216 [00:00<00:55,  3.85sent/s]bert-base-uncased metrics:   2%|▏         | 4/216 [00:00<00:48,  4.35sent/s]bert-base-uncased metrics:   2%|▏         | 5/216 [00:01<01:00,  3.51sent/s]bert-base-uncased metrics:   3%|▎         | 6/216 [00:01<01:06,  3.17sent/s]bert-base-uncased metrics:   3%|▎         | 7/216 [00:01<00:56,  3.67sent/s]bert-base-uncased metrics:   4%|▍         | 9/216 [00:01<00:34,  5.98sent/s]bert-base-uncased metrics:   5%|▌         | 11/216 [00:02<00:32,  6.30sent/s]bert-base-uncased metrics:   6%|▌         | 12/216 [00:02<00:31,  6.43sent/s]bert-base-uncased metrics:   6%|▋         | 14/216 [00:02<00:29,  6.86sent/s]bert-base-uncased metrics:   7%|▋         | 15/216 [00:02<00:34,  5.84sent/s]bert-base-uncased metrics:   7%|▋         | 16/216 [00:03<00:32,  6.19sent/s]bert-base-uncased metrics:   8%|▊         | 18/216 [00:03<00:26,  7.39sent/s]bert-base-uncased metrics:   9%|▉         | 20/216 [00:03<00:30,  6.45sent/s]bert-base-uncased metrics:  10%|▉         | 21/216 [00:03<00:38,  5.05sent/s]bert-base-uncased metrics:  10%|█         | 22/216 [00:04<00:36,  5.29sent/s]bert-base-uncased metrics:  11%|█         | 23/216 [00:04<00:37,  5.21sent/s]bert-base-uncased metrics:  12%|█▎        | 27/216 [00:04<00:22,  8.56sent/s]bert-base-uncased metrics:  13%|█▎        | 28/216 [00:04<00:28,  6.57sent/s]bert-base-uncased metrics:  13%|█▎        | 29/216 [00:05<00:31,  6.01sent/s]bert-base-uncased metrics:  14%|█▍        | 30/216 [00:05<00:33,  5.60sent/s]bert-base-uncased metrics:  14%|█▍        | 31/216 [00:05<00:34,  5.38sent/s]bert-base-uncased metrics:  15%|█▍        | 32/216 [00:05<00:31,  5.92sent/s]bert-base-uncased metrics:  15%|█▌        | 33/216 [00:05<00:27,  6.63sent/s]bert-base-uncased metrics:  17%|█▋        | 36/216 [00:05<00:15, 11.30sent/s]bert-base-uncased metrics:  18%|█▊        | 38/216 [00:06<00:27,  6.40sent/s]bert-base-uncased metrics:  19%|█▊        | 40/216 [00:06<00:24,  7.27sent/s]bert-base-uncased metrics:  19%|█▉        | 42/216 [00:07<00:30,  5.67sent/s]bert-base-uncased metrics:  20%|█▉        | 43/216 [00:07<00:29,  5.89sent/s]bert-base-uncased metrics:  20%|██        | 44/216 [00:07<00:30,  5.62sent/s]bert-base-uncased metrics:  22%|██▏       | 47/216 [00:07<00:21,  7.99sent/s]bert-base-uncased metrics:  23%|██▎       | 49/216 [00:07<00:19,  8.70sent/s]bert-base-uncased metrics:  23%|██▎       | 50/216 [00:08<00:19,  8.65sent/s]bert-base-uncased metrics:  24%|██▍       | 52/216 [00:08<00:26,  6.11sent/s]bert-base-uncased metrics:  25%|██▍       | 53/216 [00:09<00:41,  3.95sent/s]bert-base-uncased metrics:  25%|██▌       | 54/216 [00:09<00:46,  3.50sent/s]bert-base-uncased metrics:  27%|██▋       | 58/216 [00:09<00:26,  5.94sent/s]bert-base-uncased metrics:  27%|██▋       | 59/216 [00:10<00:34,  4.59sent/s]bert-base-uncased metrics:  28%|██▊       | 60/216 [00:10<00:38,  4.08sent/s]bert-base-uncased metrics:  28%|██▊       | 61/216 [00:11<00:50,  3.05sent/s]bert-base-uncased metrics:  29%|██▊       | 62/216 [00:11<00:42,  3.64sent/s]bert-base-uncased metrics:  31%|███       | 66/216 [00:11<00:20,  7.50sent/s]bert-base-uncased metrics:  31%|███▏      | 68/216 [00:12<00:27,  5.33sent/s]bert-base-uncased metrics:  32%|███▏      | 70/216 [00:12<00:33,  4.39sent/s]bert-base-uncased metrics:  33%|███▎      | 71/216 [00:13<00:32,  4.41sent/s]bert-base-uncased metrics:  33%|███▎      | 72/216 [00:13<00:30,  4.77sent/s]bert-base-uncased metrics:  34%|███▍      | 73/216 [00:13<00:30,  4.71sent/s]bert-base-uncased metrics:  35%|███▍      | 75/216 [00:13<00:23,  5.88sent/s]bert-base-uncased metrics:  36%|███▌      | 78/216 [00:13<00:16,  8.58sent/s]bert-base-uncased metrics:  37%|███▋      | 80/216 [00:15<00:38,  3.53sent/s]bert-base-uncased metrics:  38%|███▊      | 81/216 [00:15<00:36,  3.74sent/s]bert-base-uncased metrics:  38%|███▊      | 83/216 [00:15<00:31,  4.18sent/s]bert-base-uncased metrics:  40%|███▉      | 86/216 [00:15<00:23,  5.65sent/s]bert-base-uncased metrics:  40%|████      | 87/216 [00:16<00:23,  5.38sent/s]bert-base-uncased metrics:  41%|████      | 88/216 [00:16<00:27,  4.71sent/s]bert-base-uncased metrics:  41%|████      | 89/216 [00:16<00:24,  5.15sent/s]bert-base-uncased metrics:  42%|████▏     | 90/216 [00:16<00:25,  5.02sent/s]bert-base-uncased metrics:  42%|████▏     | 91/216 [00:17<00:34,  3.59sent/s]bert-base-uncased metrics:  43%|████▎     | 92/216 [00:17<00:32,  3.76sent/s]bert-base-uncased metrics:  43%|████▎     | 93/216 [00:17<00:32,  3.81sent/s]bert-base-uncased metrics:  46%|████▌     | 99/216 [00:18<00:11, 10.00sent/s]bert-base-uncased metrics:  47%|████▋     | 101/216 [00:18<00:13,  8.22sent/s]bert-base-uncased metrics:  48%|████▊     | 103/216 [00:19<00:20,  5.54sent/s]bert-base-uncased metrics:  48%|████▊     | 104/216 [00:19<00:23,  4.81sent/s]bert-base-uncased metrics:  49%|████▊     | 105/216 [00:19<00:24,  4.50sent/s]bert-base-uncased metrics:  49%|████▉     | 106/216 [00:19<00:24,  4.40sent/s]bert-base-uncased metrics:  52%|█████▏    | 112/216 [00:20<00:10,  9.82sent/s]bert-base-uncased metrics:  53%|█████▎    | 114/216 [00:20<00:15,  6.48sent/s]bert-base-uncased metrics:  54%|█████▎    | 116/216 [00:21<00:18,  5.52sent/s]bert-base-uncased metrics:  55%|█████▍    | 118/216 [00:21<00:16,  6.06sent/s]bert-base-uncased metrics:  56%|█████▌    | 120/216 [00:21<00:16,  5.80sent/s]bert-base-uncased metrics:  56%|█████▌    | 121/216 [00:22<00:15,  6.21sent/s]bert-base-uncased metrics:  59%|█████▉    | 128/216 [00:22<00:07, 11.96sent/s]bert-base-uncased metrics:  60%|██████    | 130/216 [00:23<00:11,  7.18sent/s]bert-base-uncased metrics:  61%|██████    | 132/216 [00:23<00:15,  5.59sent/s]bert-base-uncased metrics:  62%|██████▏   | 133/216 [00:24<00:16,  4.99sent/s]bert-base-uncased metrics:  62%|██████▏   | 134/216 [00:24<00:15,  5.20sent/s]bert-base-uncased metrics:  62%|██████▎   | 135/216 [00:24<00:15,  5.34sent/s]bert-base-uncased metrics:  65%|██████▌   | 141/216 [00:24<00:06, 11.45sent/s]bert-base-uncased metrics:  66%|██████▌   | 143/216 [00:24<00:08,  8.64sent/s]bert-base-uncased metrics:  67%|██████▋   | 145/216 [00:25<00:09,  7.49sent/s]bert-base-uncased metrics:  68%|██████▊   | 147/216 [00:25<00:09,  6.99sent/s]bert-base-uncased metrics:  69%|██████▉   | 149/216 [00:25<00:09,  6.86sent/s]bert-base-uncased metrics:  70%|██████▉   | 151/216 [00:26<00:08,  7.77sent/s]bert-base-uncased metrics:  70%|███████   | 152/216 [00:26<00:09,  7.06sent/s]bert-base-uncased metrics:  71%|███████   | 153/216 [00:26<00:09,  6.53sent/s]bert-base-uncased metrics:  73%|███████▎  | 157/216 [00:26<00:05, 11.40sent/s]bert-base-uncased metrics:  74%|███████▎  | 159/216 [00:27<00:11,  4.99sent/s]bert-base-uncased metrics:  75%|███████▍  | 161/216 [00:28<00:14,  3.83sent/s]bert-base-uncased metrics:  75%|███████▌  | 162/216 [00:28<00:13,  3.98sent/s]bert-base-uncased metrics:  75%|███████▌  | 163/216 [00:28<00:12,  4.34sent/s]bert-base-uncased metrics:  79%|███████▊  | 170/216 [00:29<00:04, 10.18sent/s]bert-base-uncased metrics:  80%|███████▉  | 172/216 [00:29<00:04,  9.42sent/s]bert-base-uncased metrics:  81%|████████  | 174/216 [00:30<00:06,  6.09sent/s]bert-base-uncased metrics:  81%|████████▏ | 176/216 [00:30<00:05,  7.14sent/s]bert-base-uncased metrics:  82%|████████▏ | 178/216 [00:30<00:04,  8.50sent/s]bert-base-uncased metrics:  83%|████████▎ | 180/216 [00:30<00:05,  6.99sent/s]bert-base-uncased metrics:  84%|████████▍ | 182/216 [00:30<00:04,  7.63sent/s]bert-base-uncased metrics:  86%|████████▌ | 185/216 [00:31<00:03,  9.71sent/s]bert-base-uncased metrics:  87%|████████▋ | 187/216 [00:31<00:04,  6.50sent/s]bert-base-uncased metrics:  87%|████████▋ | 188/216 [00:31<00:04,  6.81sent/s]bert-base-uncased metrics:  88%|████████▊ | 189/216 [00:31<00:03,  6.96sent/s]bert-base-uncased metrics:  88%|████████▊ | 190/216 [00:32<00:03,  6.76sent/s]bert-base-uncased metrics:  88%|████████▊ | 191/216 [00:32<00:04,  5.45sent/s]bert-base-uncased metrics:  89%|████████▉ | 192/216 [00:33<00:07,  3.25sent/s]bert-base-uncased metrics:  91%|█████████ | 196/216 [00:33<00:02,  6.70sent/s]bert-base-uncased metrics:  92%|█████████▏| 198/216 [00:33<00:03,  5.44sent/s]bert-base-uncased metrics:  93%|█████████▎| 200/216 [00:33<00:02,  5.96sent/s]bert-base-uncased metrics:  94%|█████████▎| 202/216 [00:34<00:02,  6.78sent/s]bert-base-uncased metrics:  94%|█████████▍| 203/216 [00:34<00:02,  6.44sent/s]bert-base-uncased metrics:  94%|█████████▍| 204/216 [00:34<00:02,  5.27sent/s]bert-base-uncased metrics:  95%|█████████▍| 205/216 [00:35<00:02,  4.52sent/s]bert-base-uncased metrics:  97%|█████████▋| 209/216 [00:35<00:00,  7.52sent/s]bert-base-uncased metrics:  97%|█████████▋| 210/216 [00:35<00:00,  6.50sent/s]bert-base-uncased metrics:  98%|█████████▊| 211/216 [00:35<00:00,  5.44sent/s]bert-base-uncased metrics:  98%|█████████▊| 212/216 [00:36<00:00,  5.52sent/s]bert-base-uncased metrics:  99%|█████████▊| 213/216 [00:36<00:00,  5.03sent/s]bert-base-uncased metrics:  99%|█████████▉| 214/216 [00:36<00:00,  4.15sent/s]bert-base-uncased metrics: 100%|█████████▉| 215/216 [00:36<00:00,  3.86sent/s]bert-base-uncased metrics: 100%|██████████| 216/216 [00:37<00:00,  3.66sent/s]bert-base-uncased metrics: 100%|██████████| 216/216 [00:37<00:00,  5.80sent/s]
+20:15:06  INFO      src.neural_metrics — bert-base-uncased: surprisal mean=12.964 bits, entropy mean=5.159 bits
+20:15:06  INFO      dundee_validation —   model: t5-base
+20:15:06  INFO      src.neural_metrics — Loading t5-base (seq2seq) on cuda …
+20:15:06  INFO      httpx — HTTP Request: HEAD https://huggingface.co/t5-base/resolve/main/config.json "HTTP/1.1 200 OK"
+20:15:06  INFO      httpx — HTTP Request: HEAD https://huggingface.co/t5-base/resolve/main/tokenizer_config.json "HTTP/1.1 404 Not Found"
+20:15:06  INFO      httpx — HTTP Request: HEAD https://huggingface.co/t5-base/resolve/main/tokenizer_config.json "HTTP/1.1 404 Not Found"
+20:15:07  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/t5-base/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 307 Temporary Redirect"
+20:15:07  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/google-t5/t5-base/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+20:15:07  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/t5-base/tree/main?recursive=true&expand=false "HTTP/1.1 307 Temporary Redirect"
+20:15:08  INFO      httpx — HTTP Request: GET https://huggingface.co/api/models/google-t5/t5-base/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+20:15:08  INFO      httpx — HTTP Request: HEAD https://huggingface.co/t5-base/resolve/main/spiece.model "HTTP/1.1 200 OK"
+20:15:09  INFO      httpx — HTTP Request: HEAD https://huggingface.co/t5-base/resolve/main/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%|          | 0/257 [00:00<?, ?it/s]Loading weights: 100%|██████████| 257/257 [00:00<00:00, 3523.01it/s]
+20:15:10  INFO      httpx — HTTP Request: HEAD https://huggingface.co/t5-base/resolve/main/generation_config.json "HTTP/1.1 200 OK"
+t5-base metrics:   0%|          | 0/216 [00:00<?, ?sent/s]t5-base metrics:   0%|          | 1/216 [00:00<00:25,  8.46sent/s]t5-base metrics:   2%|▏         | 4/216 [00:00<00:11, 18.96sent/s]t5-base metrics:   3%|▎         | 7/216 [00:00<00:09, 22.39sent/s]t5-base metrics:   5%|▍         | 10/216 [00:00<00:08, 24.53sent/s]t5-base metrics:   6%|▌         | 13/216 [00:00<00:07, 25.98sent/s]t5-base metrics:   7%|▋         | 16/216 [00:00<00:07, 26.20sent/s]t5-base metrics:   9%|▉         | 19/216 [00:00<00:07, 26.59sent/s]t5-base metrics:  10%|█         | 22/216 [00:00<00:07, 26.73sent/s]t5-base metrics:  12%|█▏        | 25/216 [00:00<00:07, 27.28sent/s]t5-base metrics:  13%|█▎        | 28/216 [00:01<00:06, 27.12sent/s]t5-base metrics:  14%|█▍        | 31/216 [00:01<00:06, 27.14sent/s]t5-base metrics:  16%|█▌        | 34/216 [00:01<00:06, 27.25sent/s]t5-base metrics:  17%|█▋        | 37/216 [00:01<00:06, 27.40sent/s]t5-base metrics:  19%|█▊        | 40/216 [00:01<00:06, 27.41sent/s]t5-base metrics:  20%|█▉        | 43/216 [00:01<00:06, 26.98sent/s]t5-base metrics:  21%|██▏       | 46/216 [00:01<00:06, 27.29sent/s]t5-base metrics:  23%|██▎       | 49/216 [00:01<00:06, 27.25sent/s]t5-base metrics:  24%|██▍       | 52/216 [00:01<00:05, 27.36sent/s]t5-base metrics:  25%|██▌       | 55/216 [00:02<00:06, 26.48sent/s]t5-base metrics:  27%|██▋       | 58/216 [00:02<00:05, 26.74sent/s]t5-base metrics:  28%|██▊       | 61/216 [00:02<00:06, 25.30sent/s]t5-base metrics:  30%|██▉       | 64/216 [00:02<00:05, 26.14sent/s]t5-base metrics:  31%|███       | 67/216 [00:02<00:05, 26.42sent/s]t5-base metrics:  32%|███▏      | 70/216 [00:02<00:05, 25.92sent/s]t5-base metrics:  34%|███▍      | 73/216 [00:02<00:05, 25.67sent/s]t5-base metrics:  35%|███▌      | 76/216 [00:02<00:05, 26.28sent/s]t5-base metrics:  37%|███▋      | 79/216 [00:03<00:05, 25.42sent/s]t5-base metrics:  38%|███▊      | 82/216 [00:03<00:05, 24.99sent/s]t5-base metrics:  39%|███▉      | 85/216 [00:03<00:05, 25.78sent/s]t5-base metrics:  41%|████      | 88/216 [00:03<00:05, 25.02sent/s]t5-base metrics:  42%|████▏     | 91/216 [00:03<00:04, 25.25sent/s]t5-base metrics:  44%|████▎     | 94/216 [00:03<00:04, 25.45sent/s]t5-base metrics:  45%|████▍     | 97/216 [00:03<00:04, 26.63sent/s]t5-base metrics:  46%|████▋     | 100/216 [00:03<00:04, 26.65sent/s]t5-base metrics:  48%|████▊     | 103/216 [00:03<00:04, 26.02sent/s]t5-base metrics:  49%|████▉     | 106/216 [00:04<00:04, 25.05sent/s]t5-base metrics:  50%|█████     | 109/216 [00:04<00:04, 26.35sent/s]t5-base metrics:  52%|█████▏    | 112/216 [00:04<00:03, 26.92sent/s]t5-base metrics:  53%|█████▎    | 115/216 [00:04<00:03, 25.75sent/s]t5-base metrics:  55%|█████▍    | 118/216 [00:04<00:03, 25.92sent/s]t5-base metrics:  56%|█████▌    | 121/216 [00:04<00:03, 25.83sent/s]t5-base metrics:  57%|█████▋    | 124/216 [00:04<00:03, 26.75sent/s]t5-base metrics:  59%|█████▉    | 127/216 [00:04<00:03, 27.57sent/s]t5-base metrics:  60%|██████    | 130/216 [00:04<00:03, 25.93sent/s]t5-base metrics:  62%|██████▏   | 133/216 [00:05<00:03, 26.00sent/s]t5-base metrics:  63%|██████▎   | 136/216 [00:05<00:03, 26.01sent/s]t5-base metrics:  65%|██████▍   | 140/216 [00:05<00:02, 27.33sent/s]t5-base metrics:  66%|██████▌   | 143/216 [00:05<00:02, 26.63sent/s]t5-base metrics:  68%|██████▊   | 146/216 [00:05<00:02, 26.32sent/s]t5-base metrics:  69%|██████▉   | 149/216 [00:05<00:02, 26.79sent/s]t5-base metrics:  70%|███████   | 152/216 [00:05<00:02, 26.53sent/s]t5-base metrics:  72%|███████▏  | 155/216 [00:05<00:02, 27.04sent/s]t5-base metrics:  73%|███████▎  | 158/216 [00:06<00:02, 26.81sent/s]t5-base metrics:  75%|███████▍  | 161/216 [00:06<00:02, 25.31sent/s]t5-base metrics:  76%|███████▌  | 164/216 [00:06<00:02, 25.74sent/s]t5-base metrics:  77%|███████▋  | 167/216 [00:06<00:01, 26.80sent/s]t5-base metrics:  79%|███████▊  | 170/216 [00:06<00:01, 27.27sent/s]t5-base metrics:  80%|████████  | 173/216 [00:06<00:01, 26.16sent/s]t5-base metrics:  81%|████████▏ | 176/216 [00:06<00:01, 26.61sent/s]t5-base metrics:  83%|████████▎ | 179/216 [00:06<00:01, 26.58sent/s]t5-base metrics:  84%|████████▍ | 182/216 [00:06<00:01, 26.73sent/s]t5-base metrics:  86%|████████▌ | 185/216 [00:07<00:01, 27.14sent/s]t5-base metrics:  87%|████████▋ | 188/216 [00:07<00:01, 26.21sent/s]t5-base metrics:  88%|████████▊ | 191/216 [00:07<00:00, 26.50sent/s]t5-base metrics:  90%|████████▉ | 194/216 [00:07<00:00, 25.75sent/s]t5-base metrics:  91%|█████████ | 197/216 [00:07<00:00, 25.70sent/s]t5-base metrics:  93%|█████████▎| 200/216 [00:07<00:00, 25.88sent/s]t5-base metrics:  94%|█████████▍| 203/216 [00:07<00:00, 26.46sent/s]t5-base metrics:  95%|█████████▌| 206/216 [00:07<00:00, 25.59sent/s]t5-base metrics:  97%|█████████▋| 209/216 [00:07<00:00, 26.29sent/s]t5-base metrics:  98%|█████████▊| 212/216 [00:08<00:00, 25.62sent/s]t5-base metrics: 100%|█████████▉| 215/216 [00:08<00:00, 25.17sent/s]t5-base metrics: 100%|██████████| 216/216 [00:08<00:00, 26.08sent/s]
+20:15:18  INFO      src.neural_metrics — t5-base: surprisal mean=1.996 bits, entropy mean=1.381 bits
+20:15:18  INFO      dundee_validation — Generating comparison plots …
+20:15:18  INFO      dundee_validation — Saved /tmp/psycholingu_dundee/figures/dundee_vs_ns_elpd.png
+20:15:18  WARNING   dundee_validation — Dundee surprisal_vs_ic model not available.
+20:15:18  WARNING   dundee_validation — Cannot produce beta comparison — missing full models.
+20:15:18  INFO      dundee_validation — Dundee validation complete.  Outputs: /tmp/psycholingu_dundee
+
+Outputs saved to: /tmp/psycholingu_dundee
+  Figures : /tmp/psycholingu_dundee/figures
+  Metrics : /tmp/psycholingu_dundee/metrics
+--- Step 5: Integration cost --- Fri May  8 08:15:20 PM IST 2026
+20:15:34  INFO      dundee_validation — Running Dundee validation — steps: [5]
+20:15:34  INFO      dundee_validation — Step 1 — Loading Dundee data
+20:15:34  INFO      dundee_validation — Loading cached: /tmp/psycholingu_dundee/processed/01_dundee_reading_times.parquet
+20:15:34  INFO      dundee_validation — Step 5 — Integration cost (UD parsing)
+20:15:34  INFO      src.integration_cost — Loading Stanza UD parser (lang=en) …
+UD parsing:   0%|          | 0/216 [00:00<?, ?sent/s]UD parsing:   0%|          | 1/216 [00:00<01:04,  3.36sent/s]UD parsing:   1%|          | 2/216 [00:00<00:46,  4.60sent/s]UD parsing:   1%|▏         | 3/216 [00:00<00:36,  5.80sent/s]UD parsing:   2%|▏         | 5/216 [00:00<00:29,  7.18sent/s]UD parsing:   3%|▎         | 6/216 [00:00<00:28,  7.46sent/s]UD parsing:   4%|▎         | 8/216 [00:01<00:22,  9.11sent/s]UD parsing:   5%|▍         | 10/216 [00:01<00:18, 11.29sent/s]UD parsing:   6%|▌         | 12/216 [00:01<00:18, 11.25sent/s]UD parsing:   6%|▋         | 14/216 [00:01<00:16, 12.56sent/s]UD parsing:   7%|▋         | 16/216 [00:01<00:17, 11.63sent/s]UD parsing:   8%|▊         | 18/216 [00:01<00:15, 12.50sent/s]UD parsing:   9%|▉         | 20/216 [00:02<00:16, 12.07sent/s]UD parsing:  10%|█         | 22/216 [00:02<00:17, 11.31sent/s]UD parsing:  11%|█         | 24/216 [00:02<00:16, 11.98sent/s]UD parsing:  12%|█▎        | 27/216 [00:02<00:13, 13.84sent/s]UD parsing:  13%|█▎        | 29/216 [00:02<00:15, 12.37sent/s]UD parsing:  14%|█▍        | 31/216 [00:02<00:15, 11.69sent/s]UD parsing:  15%|█▌        | 33/216 [00:03<00:15, 12.15sent/s]UD parsing:  17%|█▋        | 36/216 [00:03<00:12, 14.55sent/s]UD parsing:  18%|█▊        | 38/216 [00:03<00:14, 12.43sent/s]UD parsing:  19%|█▊        | 40/216 [00:03<00:13, 12.77sent/s]UD parsing:  19%|█▉        | 42/216 [00:03<00:14, 11.92sent/s]UD parsing:  20%|██        | 44/216 [00:03<00:14, 11.78sent/s]UD parsing:  21%|██▏       | 46/216 [00:04<00:12, 13.10sent/s]UD parsing:  22%|██▏       | 48/216 [00:04<00:12, 13.75sent/s]UD parsing:  23%|██▎       | 50/216 [00:04<00:12, 13.70sent/s]UD parsing:  24%|██▍       | 52/216 [00:04<00:13, 12.43sent/s]UD parsing:  25%|██▌       | 54/216 [00:04<00:15, 10.59sent/s]UD parsing:  26%|██▋       | 57/216 [00:04<00:12, 13.05sent/s]UD parsing:  27%|██▋       | 59/216 [00:05<00:14, 10.98sent/s]UD parsing:  28%|██▊       | 61/216 [00:05<00:15,  9.76sent/s]UD parsing:  29%|██▉       | 63/216 [00:05<00:14, 10.77sent/s]UD parsing:  31%|███       | 66/216 [00:05<00:11, 13.23sent/s]UD parsing:  31%|███▏      | 68/216 [00:05<00:13, 11.35sent/s]UD parsing:  32%|███▏      | 70/216 [00:06<00:13, 10.55sent/s]UD parsing:  33%|███▎      | 72/216 [00:06<00:13, 10.84sent/s]UD parsing:  34%|███▍      | 74/216 [00:06<00:12, 11.04sent/s]UD parsing:  35%|███▌      | 76/216 [00:06<00:11, 12.23sent/s]UD parsing:  36%|███▌      | 78/216 [00:06<00:10, 13.01sent/s]UD parsing:  37%|███▋      | 80/216 [00:07<00:14,  9.43sent/s]UD parsing:  38%|███▊      | 82/216 [00:07<00:13, 10.24sent/s]UD parsing:  39%|███▉      | 84/216 [00:07<00:11, 11.24sent/s]UD parsing:  40%|███▉      | 86/216 [00:07<00:11, 11.76sent/s]UD parsing:  41%|████      | 88/216 [00:07<00:12, 10.46sent/s]UD parsing:  42%|████▏     | 90/216 [00:08<00:11, 10.71sent/s]UD parsing:  43%|████▎     | 92/216 [00:08<00:12,  9.93sent/s]UD parsing:  44%|████▎     | 94/216 [00:08<00:11, 10.83sent/s]UD parsing:  45%|████▍     | 97/216 [00:08<00:08, 13.78sent/s]UD parsing:  46%|████▌     | 99/216 [00:08<00:07, 14.67sent/s]UD parsing:  47%|████▋     | 101/216 [00:08<00:08, 13.70sent/s]UD parsing:  48%|████▊     | 103/216 [00:09<00:09, 11.68sent/s]UD parsing:  49%|████▊     | 105/216 [00:09<00:10, 10.32sent/s]UD parsing:  50%|████▉     | 107/216 [00:09<00:09, 11.09sent/s]UD parsing:  50%|█████     | 109/216 [00:09<00:08, 12.62sent/s]UD parsing:  51%|█████▏    | 111/216 [00:09<00:07, 13.68sent/s]UD parsing:  52%|█████▏    | 113/216 [00:09<00:08, 12.19sent/s]UD parsing:  53%|█████▎    | 115/216 [00:10<00:08, 11.83sent/s]UD parsing:  54%|█████▍    | 117/216 [00:10<00:08, 11.37sent/s]UD parsing:  55%|█████▌    | 119/216 [00:10<00:08, 12.11sent/s]UD parsing:  56%|█████▌    | 121/216 [00:10<00:08, 11.56sent/s]UD parsing:  57%|█████▋    | 124/216 [00:10<00:06, 14.42sent/s]UD parsing:  59%|█████▉    | 127/216 [00:10<00:05, 16.80sent/s]UD parsing:  60%|█████▉    | 129/216 [00:11<00:06, 13.60sent/s]UD parsing:  61%|██████    | 131/216 [00:11<00:07, 11.89sent/s]UD parsing:  62%|██████▏   | 133/216 [00:11<00:07, 11.36sent/s]UD parsing:  62%|██████▎   | 135/216 [00:11<00:07, 11.23sent/s]UD parsing:  63%|██████▎   | 137/216 [00:11<00:06, 12.63sent/s]UD parsing:  65%|██████▍   | 140/216 [00:11<00:04, 15.35sent/s]UD parsing:  66%|██████▌   | 142/216 [00:12<00:05, 14.23sent/s]UD parsing:  67%|██████▋   | 144/216 [00:12<00:05, 13.73sent/s]UD parsing:  68%|██████▊   | 146/216 [00:12<00:05, 12.55sent/s]UD parsing:  69%|██████▊   | 148/216 [00:12<00:05, 12.74sent/s]UD parsing:  69%|██████▉   | 150/216 [00:12<00:05, 12.29sent/s]UD parsing:  70%|███████   | 152/216 [00:12<00:05, 12.05sent/s]UD parsing:  71%|███████▏  | 154/216 [00:13<00:04, 12.88sent/s]UD parsing:  73%|███████▎  | 157/216 [00:13<00:03, 15.11sent/s]UD parsing:  74%|███████▎  | 159/216 [00:13<00:05, 11.40sent/s]UD parsing:  75%|███████▍  | 161/216 [00:13<00:05, 10.22sent/s]UD parsing:  75%|███████▌  | 163/216 [00:13<00:05, 10.43sent/s]UD parsing:  77%|███████▋  | 166/216 [00:14<00:03, 13.25sent/s]UD parsing:  78%|███████▊  | 169/216 [00:14<00:03, 15.52sent/s]UD parsing:  79%|███████▉  | 171/216 [00:14<00:03, 14.70sent/s]UD parsing:  80%|████████  | 173/216 [00:14<00:03, 12.51sent/s]UD parsing:  81%|████████  | 175/216 [00:14<00:03, 12.79sent/s]UD parsing:  82%|████████▏ | 177/216 [00:14<00:03, 12.90sent/s]UD parsing:  83%|████████▎ | 179/216 [00:15<00:03, 12.25sent/s]UD parsing:  84%|████████▍ | 181/216 [00:15<00:02, 12.39sent/s]UD parsing:  85%|████████▌ | 184/216 [00:15<00:02, 14.83sent/s]UD parsing:  86%|████████▌ | 186/216 [00:15<00:02, 12.85sent/s]UD parsing:  87%|████████▋ | 188/216 [00:15<00:02, 12.66sent/s]UD parsing:  88%|████████▊ | 190/216 [00:15<00:02, 12.28sent/s]UD parsing:  89%|████████▉ | 192/216 [00:16<00:02, 10.31sent/s]UD parsing:  90%|█████████ | 195/216 [00:16<00:01, 13.17sent/s]UD parsing:  91%|█████████ | 197/216 [00:16<00:01, 12.23sent/s]UD parsing:  92%|█████████▏| 199/216 [00:16<00:01, 12.16sent/s]UD parsing:  93%|█████████▎| 201/216 [00:16<00:01, 12.31sent/s]UD parsing:  94%|█████████▍| 203/216 [00:16<00:01, 12.05sent/s]UD parsing:  95%|█████████▍| 205/216 [00:17<00:01, 10.96sent/s]UD parsing:  96%|█████████▌| 207/216 [00:17<00:00, 12.46sent/s]UD parsing:  97%|█████████▋| 209/216 [00:17<00:00, 13.10sent/s]UD parsing:  98%|█████████▊| 211/216 [00:17<00:00, 11.87sent/s]UD parsing:  99%|█████████▊| 213/216 [00:17<00:00, 11.90sent/s]UD parsing: 100%|█████████▉| 215/216 [00:18<00:00, 10.21sent/s]UD parsing: 100%|██████████| 216/216 [00:18<00:00, 11.87sent/s]
+20:16:08  INFO      src.integration_cost — Integration cost computed: mean dep_length=2.34, missing=6145
+20:16:08  INFO      dundee_validation — Generating comparison plots …
+20:16:09  INFO      dundee_validation — Saved /tmp/psycholingu_dundee/figures/dundee_vs_ns_elpd.png
+20:16:09  WARNING   dundee_validation — Dundee surprisal_vs_ic model not available.
+20:16:09  WARNING   dundee_validation — Cannot produce beta comparison — missing full models.
+20:16:09  INFO      dundee_validation — Dundee validation complete.  Outputs: /tmp/psycholingu_dundee
+
+Outputs saved to: /tmp/psycholingu_dundee
+  Figures : /tmp/psycholingu_dundee/figures
+  Metrics : /tmp/psycholingu_dundee/metrics
+--- Step 6: Bayesian modeling --- Fri May  8 08:16:10 PM IST 2026
+20:16:20  INFO      dundee_validation — Running Dundee validation — steps: [6]
+20:16:20  INFO      dundee_validation — Step 1 — Loading Dundee data
+20:16:20  INFO      dundee_validation — Loading cached: /tmp/psycholingu_dundee/processed/01_dundee_reading_times.parquet
+20:16:20  INFO      dundee_validation — Fitting Dundee model: baseline  predictors=['ngram_surprisal']
+20:16:20  INFO      src.bayesian_model — Fitting on 16571 observations after dropping NaN rows.
+20:16:20  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+20:16:21  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+20:16:22  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_ngram_surprisal, sigma_u0, u0_raw, sigma_eps]
+20:16:22  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_ngram_surprisal, sigma_u0, u0_raw, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.34      15        138.12    0:00:14   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.43      7         138.88    0:00:14   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.29      15        142.06    0:00:14   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.34      15        139.86    0:00:14   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 15 seconds.
+20:16:37  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 15 seconds.
+20:16:37  INFO      src.bayesian_model — Computing subsampled LOO …
+20:16:41  INFO      src.bayesian_model — LOO subsample: 16571 / 16571 obs, log_lik array 530.3 MB
+20:16:41  INFO      src.bayesian_model — reff=0.426
+20:16:55  INFO      src.bayesian_model — LOO ELPD=-18336.77 (SE=77.19)
+20:16:55  INFO      src.bayesian_model — Sampling complete.
+20:16:55  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_baseline.nc
+20:16:55  INFO      dundee_validation — Fitting Dundee model: deep_gpt2  predictors=['gpt2_surprisal']
+20:16:55  INFO      src.bayesian_model — Fitting on 11241 observations after dropping NaN rows.
+20:16:55  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+20:16:55  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+20:16:59  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+20:16:59  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.24      23        125.91    0:00:15   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.34      15        127.13    0:00:15   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.26      15        122.32    0:00:16   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.31      15        128.72    0:00:15   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 16 seconds.
+20:17:15  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 16 seconds.
+20:17:15  INFO      src.bayesian_model — Computing subsampled LOO …
+20:17:19  INFO      src.bayesian_model — LOO subsample: 11241 / 11241 obs, log_lik array 359.7 MB
+20:17:19  INFO      src.bayesian_model — reff=0.497
+20:17:28  INFO      src.bayesian_model — LOO ELPD=-12159.71 (SE=64.10)
+20:17:28  INFO      src.bayesian_model — Sampling complete.
+20:17:28  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_deep_gpt2.nc
+20:17:28  INFO      dundee_validation — Fitting Dundee model: deep_bert  predictors=['bert_base_uncased_surprisal']
+20:17:28  INFO      src.bayesian_model — Fitting on 16448 observations after dropping NaN rows.
+20:17:28  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+20:17:29  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+20:17:32  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_bert_base_uncased_surprisal, sigma_u0, u0_raw, sigma_eps]
+20:17:32  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_bert_base_uncased_surprisal, sigma_u0, u0_raw, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.33      15        138.38    0:00:14   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.36      7         139.85    0:00:14   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.21      7         137.33    0:00:14   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.30      15        143.95    0:00:13   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 15 seconds.
+20:17:46  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 15 seconds.
+20:17:46  INFO      src.bayesian_model — Computing subsampled LOO …
+20:17:50  INFO      src.bayesian_model — LOO subsample: 16448 / 16448 obs, log_lik array 526.3 MB
+20:17:50  INFO      src.bayesian_model — reff=0.396
+20:18:04  INFO      src.bayesian_model — LOO ELPD=-18118.96 (SE=77.80)
+20:18:04  INFO      src.bayesian_model — Sampling complete.
+20:18:04  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_deep_bert.nc
+20:18:05  INFO      dundee_validation — Fitting Dundee model: deep_t5  predictors=['t5_base_surprisal']
+20:18:05  INFO      src.bayesian_model — Fitting on 16571 observations after dropping NaN rows.
+20:18:05  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+20:18:05  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+20:18:06  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_t5_base_surprisal, sigma_u0, u0_raw, sigma_eps]
+20:18:06  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_t5_base_surprisal, sigma_u0, u0_raw, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.26      15        136.52    0:00:14   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.34      7         150.25    0:00:13   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.37      7         142.46    0:00:14   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.31      7         146.22    0:00:13   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 15 seconds.
+20:18:21  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 15 seconds.
+20:18:21  INFO      src.bayesian_model — Computing subsampled LOO …
+20:18:24  INFO      src.bayesian_model — LOO subsample: 16571 / 16571 obs, log_lik array 530.3 MB
+20:18:24  INFO      src.bayesian_model — reff=0.272
+20:18:39  INFO      src.bayesian_model — LOO ELPD=-18328.12 (SE=76.78)
+20:18:39  INFO      src.bayesian_model — Sampling complete.
+20:18:39  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_deep_t5.nc
+20:18:39  INFO      dundee_validation — Fitting Dundee model: surprisal_vs_ic  predictors=['gpt2_surprisal', 'integration_cost']
+20:18:39  INFO      src.bayesian_model — Fitting on 7849 observations after dropping NaN rows.
+20:18:39  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+20:18:40  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+20:18:44  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_integration_cost, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_slope_integration_cost, u_slope_raw_integration_cost, sigma_eps]
+20:18:44  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_integration_cost, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_slope_integration_cost, u_slope_raw_integration_cost, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.22      15        110.49    0:00:18   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.24      15        110.33    0:00:18   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.22      15        103.63    0:00:19   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.27      15        119.50    0:00:16   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 19 seconds.
+20:19:03  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 19 seconds.
+20:19:03  INFO      src.bayesian_model — Computing subsampled LOO …
+20:19:07  INFO      src.bayesian_model — LOO subsample: 7849 / 7849 obs, log_lik array 251.2 MB
+20:19:07  INFO      src.bayesian_model — reff=0.249
+20:19:14  INFO      src.bayesian_model — LOO ELPD=-8512.07 (SE=50.12)
+20:19:14  INFO      src.bayesian_model — Sampling complete.
+20:19:14  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_surprisal_vs_ic.nc
+20:19:14  INFO      dundee_validation — Fitting Dundee model: surprisal_vs_entropy_gpt2  predictors=['gpt2_surprisal', 'gpt2_entropy']
+20:19:14  INFO      src.bayesian_model — Fitting on 11241 observations after dropping NaN rows.
+20:19:14  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+20:19:15  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+20:19:17  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_entropy, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+20:19:17  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_entropy, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.23      15        120.03    0:00:16   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.26      15        117.18    0:00:17   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.18      15        110.73    0:00:18   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.31      15        120.32    0:00:16   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 18 seconds.
+20:19:35  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 18 seconds.
+20:19:35  INFO      src.bayesian_model — Computing subsampled LOO …
+20:19:39  INFO      src.bayesian_model — LOO subsample: 11241 / 11241 obs, log_lik array 359.7 MB
+20:19:39  INFO      src.bayesian_model — reff=0.489
+20:19:48  INFO      src.bayesian_model — LOO ELPD=-12153.99 (SE=64.33)
+20:19:48  INFO      src.bayesian_model — Sampling complete.
+20:19:48  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_surprisal_vs_entropy_gpt2.nc
+20:19:48  INFO      dundee_validation — Fitting Dundee model: surprisal_vs_entropy_bert  predictors=['bert_base_uncased_surprisal', 'bert_base_uncased_entropy']
+20:19:48  INFO      src.bayesian_model — Fitting on 16448 observations after dropping NaN rows.
+20:19:48  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+20:19:49  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+20:19:51  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_bert_base_uncased_surprisal, beta_bert_base_uncased_entropy, sigma_u0, u0_raw, sigma_eps]
+20:19:51  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_bert_base_uncased_surprisal, beta_bert_base_uncased_entropy, sigma_u0, u0_raw, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.35      15        110.48    0:00:18   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.40      15        115.79    0:00:17   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.32      15        112.84    0:00:17   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.36      7         126.13    0:00:15   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 18 seconds.
+20:20:09  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 18 seconds.
+20:20:09  INFO      src.bayesian_model — Computing subsampled LOO …
+20:20:13  INFO      src.bayesian_model — LOO subsample: 16448 / 16448 obs, log_lik array 526.3 MB
+20:20:13  INFO      src.bayesian_model — reff=0.441
+20:20:26  INFO      src.bayesian_model — LOO ELPD=-17959.65 (SE=77.95)
+20:20:26  INFO      src.bayesian_model — Sampling complete.
+20:20:27  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_surprisal_vs_entropy_bert.nc
+20:20:27  INFO      dundee_validation — Fitting Dundee model: surprisal_vs_entropy_t5  predictors=['t5_base_surprisal', 't5_base_entropy']
+20:20:27  INFO      src.bayesian_model — Fitting on 16571 observations after dropping NaN rows.
+20:20:27  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+20:20:27  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+20:20:29  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_t5_base_surprisal, beta_t5_base_entropy, sigma_u0, u0_raw, sigma_eps]
+20:20:29  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_t5_base_surprisal, beta_t5_base_entropy, sigma_u0, u0_raw, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.32      15        108.74    0:00:18   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.35      15        110.65    0:00:18   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.30      31        107.54    0:00:18   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.31      7         109.27    0:00:18   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 19 seconds.
+20:20:48  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 19 seconds.
+20:20:48  INFO      src.bayesian_model — Computing subsampled LOO …
+20:20:52  INFO      src.bayesian_model — LOO subsample: 16571 / 16571 obs, log_lik array 530.3 MB
+20:20:52  INFO      src.bayesian_model — reff=0.419
+20:21:05  INFO      src.bayesian_model — LOO ELPD=-18318.22 (SE=76.87)
+20:21:05  INFO      src.bayesian_model — Sampling complete.
+20:21:06  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_surprisal_vs_entropy_t5.nc
+20:21:06  INFO      dundee_validation — Fitting Dundee model: full  predictors=['ngram_surprisal', 'gpt2_surprisal', 'bert_base_uncased_surprisal', 't5_base_surprisal', 'gpt2_entropy', 'bert_base_uncased_entropy', 't5_base_entropy', 'integration_cost']
+20:21:06  INFO      src.bayesian_model — Fitting on 7849 observations after dropping NaN rows.
+20:21:06  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+20:21:07  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+20:21:10  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_ngram_surprisal, beta_gpt2_surprisal, beta_bert_base_uncased_surprisal, beta_t5_base_surprisal, beta_gpt2_entropy, beta_bert_base_uncased_entropy, beta_t5_base_entropy, beta_integration_cost, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_slope_integration_cost, u_slope_raw_integration_cost, sigma_eps]
+20:21:10  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_ngram_surprisal, beta_gpt2_surprisal, beta_bert_base_uncased_surprisal, beta_t5_base_surprisal, beta_gpt2_entropy, beta_bert_base_uncased_entropy, beta_t5_base_entropy, beta_integration_cost, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_slope_integration_cost, u_slope_raw_integration_cost, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.31      15        64.29     0:00:31   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    1         0.17      29        64.99     0:00:30   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.24      15        71.64     0:00:27   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.28      15        60.21     0:00:33   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 33 seconds.
+20:21:44  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 33 seconds.
+There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
+20:21:44  ERROR     pymc.stats.convergence — There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
+20:21:44  INFO      src.bayesian_model — Computing subsampled LOO …
+20:21:48  INFO      src.bayesian_model — LOO subsample: 7849 / 7849 obs, log_lik array 251.2 MB
+20:21:48  INFO      src.bayesian_model — reff=0.235
+20:21:55  INFO      src.bayesian_model — LOO ELPD=-8373.37 (SE=52.31)
+20:21:55  INFO      src.bayesian_model — Sampling complete.
+20:21:56  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_full.nc
+Traceback (most recent call last):
+  File "/home2/ishaan.romil/Psycho_Sanchit/scripts/dundee_validation.py", line 499, in <module>
+    main()
+  File "/home2/ishaan.romil/Psycho_Sanchit/scripts/dundee_validation.py", line 477, in main
+    dundee_idata, _ = run_step6(cfg, df, metrics_dir, figures_dir)
+  File "/home2/ishaan.romil/Psycho_Sanchit/scripts/dundee_validation.py", line 217, in run_step6
+    comp   = bm_ref.compare_models(loo_results)
+  File "/home2/ishaan.romil/Psycho_Sanchit/src/bayesian_model.py", line 323, in compare_models
+    comparison = az.compare(loo_results, ic="loo")
+  File "/home2/ishaan.romil/.local/lib/python3.10/site-packages/arviz/stats/stats.py", line 225, in compare
+    rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
+  File "/home2/ishaan.romil/.local/lib/python3.10/site-packages/arviz/stats/stats.py", line 307, in _ic_matrix
+    raise ValueError("The number of observations should be the same across all models")
+ValueError: The number of observations should be the same across all models
+--- Generating cross-dataset comparison plots --- Fri May  8 08:21:58 PM IST 2026
+20:22:13  INFO      dundee_validation — Running Dundee validation — steps: []
+20:22:13  INFO      dundee_validation — Step 1 — Loading Dundee data
+20:22:13  INFO      dundee_validation — Loading cached: /tmp/psycholingu_dundee/processed/01_dundee_reading_times.parquet
+20:22:15  INFO      dundee_validation — Generating comparison plots …
+20:22:15  INFO      dundee_validation — Saved /tmp/psycholingu_dundee/figures/dundee_vs_ns_elpd.png
+20:22:15  INFO      dundee_validation — Saved /tmp/psycholingu_dundee/figures/dundee_h2_ic_replication.png
+20:22:15  WARNING   dundee_validation — Cannot produce beta comparison — missing full models.
+20:22:15  INFO      dundee_validation — Cross-dataset table saved: /tmp/psycholingu_dundee/metrics/cross_dataset_comparison_dundee.csv
+20:22:15  INFO      dundee_validation — Dundee validation complete.  Outputs: /tmp/psycholingu_dundee
+
+Outputs saved to: /tmp/psycholingu_dundee
+  Figures : /tmp/psycholingu_dundee/figures
+  Metrics : /tmp/psycholingu_dundee/metrics
+--- Copying outputs to project directory --- Fri May  8 08:22:17 PM IST 2026
+Time at exit: Fri May  8 08:22:17 PM IST 2026
+Dundee outputs:
+  Figures : /tmp/psycholingu_dundee/figures/
+  Metrics : /tmp/psycholingu_dundee/metrics/

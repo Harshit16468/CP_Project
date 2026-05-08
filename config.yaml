@@ -1,107 +1,74 @@
-
-# ============================================================
-# Project Configuration
-# Disentangling Predictive Surprisal, Entropy, and Syntactic
-# Integration Cost in Human Sentence Processing
-# ============================================================
-
 paths:
-  raw_data:       /tmp/psycholingu/data/raw
+  raw_data: /home2/ishaan.romil/Psycho_Sanchit/data_shared
   processed_data: /tmp/psycholingu/data/processed
-  results:        /tmp/psycholingu/results/metrics
-  figures:        /tmp/psycholingu/results/figures
-  ngram_corpus:   /tmp/psycholingu/data/raw/ngram_corpus.txt
-  # SUBTLEX-US word frequency norms (Brysbaert & New 2009).
-  # Download the Excel file and place it here.
-  # If missing, corpus frequency is used as fallback.
-  subtlex_file:   /tmp/psycholingu/data/raw/SUBTLEX-US.xlsx
-
-# Dataset choice: "natural_stories" | "geco" | "dundee"
+  results: /tmp/psycholingu/results/metrics
+  figures: /tmp/psycholingu/results/figures
+  ngram_corpus: /home2/ishaan.romil/Psycho_Sanchit/data_shared/ngram_corpus.txt
 dataset: natural_stories
-
 natural_stories:
-  stories_file:  /tmp/psycholingu/data/raw/natural_stories/all_stories.tok
-  rt_file:       /tmp/psycholingu/data/raw/natural_stories/processed_RTs.tsv
-  wordinfo_file: /tmp/psycholingu/data/raw/natural_stories/processed_wordinfo.tsv
-
+  stories_file: /home2/ishaan.romil/Psycho_Sanchit/data_shared/natural_stories/all_stories.tok
+  rt_file: /home2/ishaan.romil/Psycho_Sanchit/data_shared/natural_stories/processed_RTs.tsv
+  wordinfo_file: /home2/ishaan.romil/Psycho_Sanchit/data_shared/natural_stories/processed_wordinfo.tsv
 geco:
-  words_file:    /tmp/psycholingu/data/raw/geco/EnglishMaterial.xlsx
-  rt_file:       /tmp/psycholingu/data/raw/geco/L1ReadingData.xlsx
-
-# ----------------------------------------------------------------
-# N-gram model
-# ----------------------------------------------------------------
+  words_file: /home2/ishaan.romil/Psycho_Sanchit/data_shared/geco/EnglishMaterial.xlsx
+  rt_file: /home2/ishaan.romil/Psycho_Sanchit/data_shared/geco/L1ReadingData.xlsx
+dundee:
+  data_dir: /home2/ishaan.romil/Psycho_Sanchit/dundee
+  treebank_file: /home2/ishaan.romil/Psycho_Sanchit/dundee/TLT2015/TheDundeeTreebank_v1-0.csv
+  merged_file: ''
+  rt_measure: FDUR
 ngram:
-  order: 3                        # trigram
+  order: 3
   smoothing: kneser_ney
   min_count: 1
-
-# ----------------------------------------------------------------
-# Neural language models
-# ----------------------------------------------------------------
 models:
   gpt2:
     name: gpt2
-    type: causal                  # left-to-right autoregressive
-    batch_size: 8
-    device: auto                  # "cpu" | "cuda" | "auto"
-
-  bert:
-    name: bert-base-uncased
-    type: masked                  # pseudo-surprisal via masking
+    type: causal
     batch_size: 8
     device: auto
-
+  bert:
+    name: bert-base-uncased
+    type: masked
+    batch_size: 8
+    device: auto
   t5:
     name: t5-base
     type: seq2seq
     batch_size: 8
     device: auto
-
-# ----------------------------------------------------------------
-# Attention analysis
-# ----------------------------------------------------------------
 attention:
-  models: [gpt2, bert, t5]       # models to extract heads from
-  layers: all                     # "all" or list of layer indices
+  models:
+  - gpt2
+  - bert
+  - t5
+  layers: all
   correlation_method: spearman
-
-# ----------------------------------------------------------------
-# Integration cost (UD parsing)
-# ----------------------------------------------------------------
 integration_cost:
-  parser: stanza                  # "stanza" | "spacy"
+  parser: stanza
   language: en
-
-# ----------------------------------------------------------------
-# Bayesian hierarchical model
-# ----------------------------------------------------------------
 bayesian:
   predictors:
-    - ngram_surprisal
-    - gpt2_surprisal
-    - bert_base_uncased_surprisal
-    - t5_base_surprisal
-    - gpt2_entropy
-    - bert_base_uncased_entropy
-    - t5_base_entropy
-    - integration_cost
-    - log_freq
-    - word_length
-    - gpt2_surprisal_lag1
-    - gpt2_entropy_reduction
+  - ngram_surprisal
+  - gpt2_surprisal
+  - bert_base_uncased_surprisal
+  - t5_base_surprisal
+  - gpt2_entropy
+  - bert_base_uncased_entropy
+  - t5_base_entropy
+  - integration_cost
   random_slopes:
-    - gpt2_surprisal
-    - integration_cost
-  rt_transform: log               # "log" | "none"
-  outlier_sd_cutoff: 3.0          # remove RTs beyond N SDs per subject
+  - gpt2_surprisal
+  - integration_cost
+  rt_transform: log
+  outlier_sd_cutoff: 3.0
   min_rt_ms: 100
   max_rt_ms: 3000
-  # PyMC sampler settings
-  max_obs: 50000              # subsample for faster MCMC mixing
+  max_obs: 50000
   compute_loo: true
-  draws: 2000
-  tune: 2000
+  draws: 1000
+  tune: 1000
   chains: 4
   target_accept: 0.9
   random_seed: 42
+  intercept_prior: data
