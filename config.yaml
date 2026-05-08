@@ -4,6 +4,10 @@ paths:
   results: /tmp/psycholingu/results/metrics
   figures: /tmp/psycholingu/results/figures
   ngram_corpus: /home2/ishaan.romil/Psycho_Sanchit/data_shared/ngram_corpus.txt
+  # SUBTLEX-US word frequency norms (Brysbaert & New 2009).
+  # Download the Excel file and place it here.
+  # If missing, corpus frequency is used as fallback.
+  subtlex_file:   /tmp/psycholingu/data/raw/SUBTLEX-US.xlsx
 dataset: natural_stories
 natural_stories:
   stories_file: /home2/ishaan.romil/Psycho_Sanchit/data_shared/natural_stories/all_stories.tok
@@ -57,6 +61,10 @@ bayesian:
   - bert_base_uncased_entropy
   - t5_base_entropy
   - integration_cost
+  - log_freq
+  - word_length
+  - gpt2_surprisal_lag1
+  - gpt2_entropy_reduction
   random_slopes:
   - gpt2_surprisal
   - integration_cost
