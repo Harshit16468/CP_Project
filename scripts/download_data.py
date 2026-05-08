@@ -129,6 +129,54 @@ def _write_stub_corpus(dest: Path) -> None:
     dest.write_text(stub, encoding="utf-8")
     logger.info("Wrote stub n-gram corpus to %s (replace with real data!)", dest)
 
+# ---------------------------------------------------------------------------
+# SUBTLEX-US word frequency norms (Brysbaert & New, 2009)
+# ---------------------------------------------------------------------------
+
+SUBTLEX_DEST = RAW / "SUBTLEX-US.xlsx"
+SUBTLEX_URL  = (
+    "https://www.ugent.be/pp/experimentele-psychologie/en/research/documents/"
+    "subtlexus/subtlexus2.zip"
+)
+
+
+def download_subtlex() -> None:
+    """
+    Download SUBTLEX-US frequency norms.
+    Falls back to printing manual download instructions if the URL fails.
+    """
+    if SUBTLEX_DEST.exists():
+        logger.info("SUBTLEX-US already exists at %s", SUBTLEX_DEST)
+        return
+
+    RAW.mkdir(parents=True, exist_ok=True)
+    import zipfile, io
+
+    logger.info("Downloading SUBTLEX-US …")
+    try:
+        with urllib.request.urlopen(SUBTLEX_URL, timeout=30) as resp:
+            data = resp.read()
+        zf = zipfile.ZipFile(io.BytesIO(data))
+        xlsx_names = [n for n in zf.namelist() if n.lower().endswith(".xlsx")]
+        if not xlsx_names:
+            raise ValueError("No .xlsx found in SUBTLEX zip")
+        with zf.open(xlsx_names[0]) as src, open(SUBTLEX_DEST, "wb") as dst:
+            dst.write(src.read())
+        logger.info("Saved SUBTLEX-US to %s", SUBTLEX_DEST)
+    except Exception as exc:
+        logger.warning("Automatic SUBTLEX download failed: %s", exc)
+        logger.warning(
+            "Please download SUBTLEX-US manually:\n"
+            "  1. Go to: https://www.ugent.be/pp/experimentele-psychologie/"
+            "en/research/documents/subtlexus\n"
+            "  2. Download SUBTLEXus74286wordstextversion.zip\n"
+            "  3. Extract the .xlsx file to: %s\n"
+            "The pipeline will use corpus frequency as fallback until "
+            "SUBTLEX-US is available.",
+            SUBTLEX_DEST,
+        )
+
+
 
 # ---------------------------------------------------------------------------
 # Main
@@ -140,5 +188,8 @@ if __name__ == "__main__":
 
     logger.info("Building n-gram background corpus …")
     download_ngram_corpus(n_articles=100)
+
+    logger.info("Downloading SUBTLEX-US frequency norms …")
+    download_subtlex()
 
     logger.info("Done. Data is ready in %s", RAW)
