@@ -441,9 +441,6 @@ def main() -> None:
             df = pd.read_parquet(cache)
 
     # ── Step 5: Integration cost (runs before step 4 — 4 needs dep_length) ───
-    if df is not None:
-        df = step_lexical_derived(cfg, df)
-
     if 5 in steps:
         df = step5_integration_cost(cfg, df)
     else:
@@ -455,6 +452,11 @@ def main() -> None:
     # Bayesian config and model variants expect integration_cost.
     if df is not None and "dep_length" in df.columns and "integration_cost" not in df.columns:
         df = df.rename(columns={"dep_length": "integration_cost"})
+
+    # ── Lexical / derived features (must run AFTER step 5 cache load,
+    #    otherwise the step-5 reload would clobber the new columns) ──
+    if df is not None:
+        df = step_lexical_derived(cfg, df)
 
     # ── Step 4: Attention analysis (needs dep_length from step 5) ────────────
     # Note: after the rename above, the column is "integration_cost";

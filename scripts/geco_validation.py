@@ -62,6 +62,7 @@ from src.ngram_surprisal    import build_ngram_model, compute_ngram_surprisal
 from src.neural_metrics     import NeuralMetricsExtractor
 from src.integration_cost   import build_parser, compute_integration_cost
 from src.bayesian_model     import BayesianHierarchicalModel
+from src.lexical_features   import add_lexical_controls
 
 logging.basicConfig(
     level=logging.INFO,
@@ -85,7 +86,20 @@ GECO_VARIANTS = {
     "surprisal_vs_entropy_bert":  ["bert_base_uncased_surprisal", "bert_base_uncased_entropy"],
     "surprisal_vs_entropy_t5":    ["t5_base_surprisal", "t5_base_entropy"],
     "full": None,   # filled from config at runtime
+    # ── Psycholinguistic-controls variants (matches pipeline.py) ─────────────
+    "controls_only":              ["log_freq", "word_length"],
+    "gpt2_controls":              ["gpt2_surprisal", "log_freq", "word_length"],
+    "spillover":                  ["gpt2_surprisal", "gpt2_surprisal_lag1",
+                                   "log_freq", "word_length"],
+    "entropy_reduction":          ["gpt2_surprisal", "gpt2_entropy_reduction",
+                                   "log_freq", "word_length"],
+    "full_psycholing":            ["gpt2_surprisal", "gpt2_surprisal_lag1",
+                                   "integration_cost", "gpt2_entropy_reduction",
+                                   "log_freq", "word_length"],
 }
+
+# Variants that drop the standard random_slopes (no gpt2_surprisal predictor)
+NO_RANDOM_SLOPES_VARIANTS = {"controls_only"}
 
 
 def load_config(path: str) -> dict:
@@ -169,6 +183,20 @@ def run_step5(cfg: dict, df: pd.DataFrame, proc_dir: Path) -> pd.DataFrame:
     return df
 
 
+def run_step_lexical(cfg: dict, df: pd.DataFrame, proc_dir: Path) -> pd.DataFrame:
+    """
+    Add psycholinguistic control variables (word_length, log_freq, *_lag1, *_reduction).
+    Matches pipeline.py:step_lexical_derived. Cached as 03b_geco_lexical_derived.parquet.
+    """
+    logger.info("Step — Lexical / derived features (length, frequency, spillover, ΔH)")
+    p = cache(proc_dir, "03b_geco_lexical_derived.parquet")
+    if p.exists():
+        return pd.read_parquet(p)
+    df = add_lexical_controls(df, cfg)
+    df.to_parquet(p, index=True)
+    return df
+
+
 def run_step6(
     cfg: dict,
     df: pd.DataFrame,
@@ -199,6 +227,11 @@ def run_step6(
             continue
 
         v_cfg = {**bay_cfg, "predictors": preds}
+        # Drop random slopes that aren't present in this variant's predictors
+        # (e.g. controls_only has no gpt2_surprisal so its random slope is invalid)
+        v_cfg["random_slopes"] = [
+            s for s in bay_cfg.get("random_slopes", []) if s in preds
+        ]
         bm    = BayesianHierarchicalModel(v_cfg)
         logger.info("Fitting GECO model: %s  predictors=%s", name, preds)
         idata = bm.fit(df)
@@ -538,6 +571,10 @@ def main() -> None:
         p = proc_dir / "05_geco_integration_cost.parquet"
         if p.exists():
             df = pd.read_parquet(p)
+
+    # ── Lexical / derived features (always runs before step 6) ──────────────
+    if df is not None and 6 in steps:
+        df = run_step_lexical(cfg, df, proc_dir)
 
     # Normalise column name (integration_cost.py writes dep_length)
     if "dep_length" in df.columns and "integration_cost" not in df.columns:

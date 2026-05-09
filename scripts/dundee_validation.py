@@ -71,6 +71,7 @@ from src.ngram_surprisal  import build_ngram_model, compute_ngram_surprisal
 from src.neural_metrics   import NeuralMetricsExtractor
 from src.integration_cost import build_parser, compute_integration_cost
 from src.bayesian_model   import BayesianHierarchicalModel
+from src.lexical_features import add_lexical_controls
 
 logging.basicConfig(
     level=logging.INFO,
@@ -89,6 +90,16 @@ DUNDEE_VARIANTS = {
     "surprisal_vs_entropy_bert":  ["bert_base_uncased_surprisal", "bert_base_uncased_entropy"],
     "surprisal_vs_entropy_t5":    ["t5_base_surprisal", "t5_base_entropy"],
     "full": None,
+    # ── Psycholinguistic-controls variants (matches pipeline.py) ─────────────
+    "controls_only":              ["log_freq", "word_length"],
+    "gpt2_controls":              ["gpt2_surprisal", "log_freq", "word_length"],
+    "spillover":                  ["gpt2_surprisal", "gpt2_surprisal_lag1",
+                                   "log_freq", "word_length"],
+    "entropy_reduction":          ["gpt2_surprisal", "gpt2_entropy_reduction",
+                                   "log_freq", "word_length"],
+    "full_psycholing":            ["gpt2_surprisal", "gpt2_surprisal_lag1",
+                                   "integration_cost", "gpt2_entropy_reduction",
+                                   "log_freq", "word_length"],
 }
 
 
@@ -176,6 +187,17 @@ def run_step5(cfg: dict, df: pd.DataFrame, proc_dir: Path) -> pd.DataFrame:
     return df
 
 
+def run_step_lexical(cfg: dict, df: pd.DataFrame, proc_dir: Path) -> pd.DataFrame:
+    """Add psycholinguistic control variables. Cached parquet."""
+    logger.info("Step — Lexical / derived features (length, frequency, spillover, ΔH)")
+    p = proc_dir / "03b_dundee_lexical_derived.parquet"
+    if p.exists():
+        return pd.read_parquet(p)
+    df = add_lexical_controls(df, cfg)
+    df.to_parquet(p, index=True)
+    return df
+
+
 def run_step6(cfg: dict, df: pd.DataFrame, metrics_dir: Path, figures_dir: Path) -> tuple:
     import arviz as az
 
@@ -199,6 +221,9 @@ def run_step6(cfg: dict, df: pd.DataFrame, metrics_dir: Path, figures_dir: Path)
             continue
 
         v_cfg = {**bay_cfg, "predictors": preds}
+        v_cfg["random_slopes"] = [
+            s for s in bay_cfg.get("random_slopes", []) if s in preds
+        ]
         bm    = BayesianHierarchicalModel(v_cfg)
         logger.info("Fitting Dundee model: %s  predictors=%s", name, preds)
         idata = bm.fit(df)
@@ -472,6 +497,10 @@ def main() -> None:
 
     if "dep_length" in df.columns and "integration_cost" not in df.columns:
         df = df.rename(columns={"dep_length": "integration_cost"})
+
+    # Lexical / derived features must run before step 6 (variants depend on them)
+    if df is not None and 6 in steps:
+        df = run_step_lexical(cfg, df, proc_dir)
 
     if 6 in steps:
         dundee_idata, _ = run_step6(cfg, df, metrics_dir, figures_dir)

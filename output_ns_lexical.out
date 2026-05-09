@@ -1,0 +1,273 @@
+==========================================
+SLURM_JOB_ID = 2621087
+SLURM_NODELIST = gnode061
+SLURM_JOB_GPUS = 1
+==========================================
+Time at entrypoint: Sat May  9 04:35:44 AM IST 2026
+Working directory: /home2/ishaan.romil/CP_Project
+04:35:58  INFO      pipeline — Running steps: [6]
+04:35:59  WARNING   src.lexical_features — SUBTLEX-US file not found at '/tmp/psycholingu/data/raw/SUBTLEX-US.xlsx'. Falling back to corpus frequency. Set paths.subtlex_file in config.yaml for proper frequency norms.
+04:36:02  INFO      src.lexical_features — Lexical controls added: word_length, log_freq, 4 spillover columns, 3 entropy-reduction columns.
+04:36:03  INFO      pipeline — Cached lexical/derived features to /tmp/psycholingu/data/processed/03b_lexical_derived.parquet
+04:36:03  INFO      pipeline — ============================================================
+04:36:03  INFO      pipeline — STEP 6 — Bayesian Hierarchical Modeling
+04:36:03  INFO      pipeline — ============================================================
+04:36:03  INFO      pipeline — Loading cached Bayesian model: baseline
+04:36:03  INFO      pipeline — Loading cached Bayesian model: deep_gpt2
+04:36:04  INFO      pipeline — Loading cached Bayesian model: deep_bert
+04:36:04  INFO      pipeline — Loading cached Bayesian model: deep_t5
+04:36:04  INFO      pipeline — Loading cached Bayesian model: surprisal_vs_ic
+04:36:04  INFO      pipeline — Loading cached Bayesian model: surprisal_vs_entropy_gpt2
+04:36:04  INFO      pipeline — Loading cached Bayesian model: surprisal_vs_entropy_bert
+04:36:05  INFO      pipeline — Loading cached Bayesian model: surprisal_vs_entropy_t5
+04:36:05  INFO      pipeline — Loading cached Bayesian model: full
+04:36:05  INFO      pipeline — Fitting Bayesian model: controls_only  predictors=['log_freq', 'word_length']
+04:36:05  INFO      src.bayesian_model — Fitting on 835700 observations after dropping NaN rows.
+04:36:05  INFO      src.bayesian_model — Subsampled to 50000 observations (max_obs=50000).
+04:36:05  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+04:36:07  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+04:36:09  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_eps]
+04:36:09  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.10      31        27.27     0:01:13   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.12      31        26.34     0:01:15   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.07      31        26.39     0:01:15   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.14      31        26.51     0:01:15   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 76 seconds.
+04:37:25  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 76 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+04:37:26  INFO      pymc.stats.convergence — The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:37:26  ERROR     pymc.stats.convergence — The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:37:26  INFO      src.bayesian_model — Computing subsampled LOO …
+04:37:31  INFO      src.bayesian_model — LOO subsample: 20000 / 50000 obs, log_lik array 640.0 MB
+04:37:31  INFO      src.bayesian_model — reff=0.010
+/home2/ishaan.romil/.local/lib/python3.10/site-packages/arviz/stats/stats.py:782: UserWarning: Estimated shape parameter of Pareto distribution is greater than 0.70 for one or more samples. You should consider using a more robust model, this is because importance sampling is less likely to work well if the marginal posterior and LOO posterior are very different. This is more likely to happen with a non-robust model and highly influential observations.
+  warnings.warn(
+04:37:55  INFO      src.bayesian_model — LOO ELPD=-1188.95 (SE=134.47)
+04:37:55  INFO      src.bayesian_model — Sampling complete.
+04:37:56  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu/results/metrics/06_bayes_controls_only.nc
+04:38:02  INFO      src.bayesian_model — Saved posterior plot to /tmp/psycholingu/results/figures/posterior_betas.png
+04:38:02  INFO      src.bayesian_model — Saved forest plot to /tmp/psycholingu/results/figures/forest_plot.png
+04:38:02  INFO      pipeline — Fitting Bayesian model: gpt2_controls  predictors=['gpt2_surprisal', 'log_freq', 'word_length']
+04:38:02  INFO      src.bayesian_model — Fitting on 600421 observations after dropping NaN rows.
+04:38:02  INFO      src.bayesian_model — Subsampled to 50000 observations (max_obs=50000).
+04:38:02  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+04:38:03  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+04:38:08  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+04:38:08  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.10      31        16.77     0:01:59   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.09      31        17.15     0:01:56   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.06      63        15.98     0:02:05   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.07      31        17.42     0:01:54   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 125 seconds.
+04:40:13  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 125 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+04:40:15  INFO      pymc.stats.convergence — The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:40:15  ERROR     pymc.stats.convergence — The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:40:15  INFO      src.bayesian_model — Computing subsampled LOO …
+04:40:21  INFO      src.bayesian_model — LOO subsample: 20000 / 50000 obs, log_lik array 640.0 MB
+04:40:21  INFO      src.bayesian_model — reff=0.010
+/home2/ishaan.romil/.local/lib/python3.10/site-packages/arviz/stats/stats.py:1042: RuntimeWarning: overflow encountered in exp
+  weights = 1 / np.exp(len_scale - len_scale[:, None]).sum(axis=1)
+/home2/ishaan.romil/.local/lib/python3.10/site-packages/numpy/_core/_methods.py:52: RuntimeWarning: overflow encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/home2/ishaan.romil/.local/lib/python3.10/site-packages/arviz/stats/stats.py:782: UserWarning: Estimated shape parameter of Pareto distribution is greater than 0.70 for one or more samples. You should consider using a more robust model, this is because importance sampling is less likely to work well if the marginal posterior and LOO posterior are very different. This is more likely to happen with a non-robust model and highly influential observations.
+  warnings.warn(
+04:40:44  INFO      src.bayesian_model — LOO ELPD=-1154.88 (SE=131.50)
+04:40:44  INFO      src.bayesian_model — Sampling complete.
+04:40:45  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu/results/metrics/06_bayes_gpt2_controls.nc
+04:40:53  INFO      src.bayesian_model — Saved posterior plot to /tmp/psycholingu/results/figures/posterior_betas.png
+04:40:54  INFO      src.bayesian_model — Saved forest plot to /tmp/psycholingu/results/figures/forest_plot.png
+04:40:54  INFO      pipeline — Fitting Bayesian model: spillover  predictors=['gpt2_surprisal', 'gpt2_surprisal_lag1', 'log_freq', 'word_length']
+04:40:54  INFO      src.bayesian_model — Fitting on 557898 observations after dropping NaN rows.
+04:40:54  INFO      src.bayesian_model — Subsampled to 50000 observations (max_obs=50000).
+04:40:54  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+04:40:54  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+04:41:00  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+04:41:00  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.08      63        13.08     0:02:32   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.11      31        14.70     0:02:16   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.11      31        15.45     0:02:09   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.07      31        15.25     0:02:11   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 153 seconds.
+04:43:33  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 153 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+04:43:34  INFO      pymc.stats.convergence — The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:43:34  ERROR     pymc.stats.convergence — The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:43:34  INFO      src.bayesian_model — Computing subsampled LOO …
+04:43:41  INFO      src.bayesian_model — LOO subsample: 20000 / 50000 obs, log_lik array 640.0 MB
+04:43:41  INFO      src.bayesian_model — reff=0.010
+/home2/ishaan.romil/.local/lib/python3.10/site-packages/arviz/stats/stats.py:782: UserWarning: Estimated shape parameter of Pareto distribution is greater than 0.70 for one or more samples. You should consider using a more robust model, this is because importance sampling is less likely to work well if the marginal posterior and LOO posterior are very different. This is more likely to happen with a non-robust model and highly influential observations.
+  warnings.warn(
+04:44:05  INFO      src.bayesian_model — LOO ELPD=-1012.56 (SE=129.87)
+04:44:05  INFO      src.bayesian_model — Sampling complete.
+04:44:06  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu/results/metrics/06_bayes_spillover.nc
+04:44:13  INFO      src.bayesian_model — Saved posterior plot to /tmp/psycholingu/results/figures/posterior_betas.png
+04:44:13  INFO      src.bayesian_model — Saved forest plot to /tmp/psycholingu/results/figures/forest_plot.png
+04:44:13  INFO      pipeline — Fitting Bayesian model: entropy_reduction  predictors=['gpt2_surprisal', 'gpt2_entropy_reduction', 'log_freq', 'word_length']
+04:44:13  INFO      src.bayesian_model — Fitting on 557898 observations after dropping NaN rows.
+04:44:13  INFO      src.bayesian_model — Subsampled to 50000 observations (max_obs=50000).
+04:44:13  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+04:44:14  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+04:44:16  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+04:44:16  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.10      31        16.18     0:02:03   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.10      31        16.82     0:01:58   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.12      63        11.92     0:02:47   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.11      31        16.00     0:02:04   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 168 seconds.
+04:47:04  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 168 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+04:47:06  INFO      pymc.stats.convergence — The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:47:06  ERROR     pymc.stats.convergence — The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:47:06  INFO      src.bayesian_model — Computing subsampled LOO …
+04:47:12  INFO      src.bayesian_model — LOO subsample: 20000 / 50000 obs, log_lik array 640.0 MB
+04:47:12  INFO      src.bayesian_model — reff=0.010
+/home2/ishaan.romil/.local/lib/python3.10/site-packages/arviz/stats/stats.py:782: UserWarning: Estimated shape parameter of Pareto distribution is greater than 0.70 for one or more samples. You should consider using a more robust model, this is because importance sampling is less likely to work well if the marginal posterior and LOO posterior are very different. This is more likely to happen with a non-robust model and highly influential observations.
+  warnings.warn(
+04:47:36  INFO      src.bayesian_model — LOO ELPD=-1043.80 (SE=129.90)
+04:47:36  INFO      src.bayesian_model — Sampling complete.
+04:47:37  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu/results/metrics/06_bayes_entropy_reduction.nc
+04:47:45  INFO      src.bayesian_model — Saved posterior plot to /tmp/psycholingu/results/figures/posterior_betas.png
+04:47:45  INFO      src.bayesian_model — Saved forest plot to /tmp/psycholingu/results/figures/forest_plot.png
+04:47:45  INFO      pipeline — Fitting Bayesian model: full_psycholing  predictors=['gpt2_surprisal', 'gpt2_surprisal_lag1', 'integration_cost', 'gpt2_entropy_reduction', 'log_freq', 'word_length']
+04:47:45  INFO      src.bayesian_model — Fitting on 453232 observations after dropping NaN rows.
+04:47:45  INFO      src.bayesian_model — Subsampled to 50000 observations (max_obs=50000).
+04:47:45  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+04:47:46  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+04:47:53  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_integration_cost, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_slope_integration_cost, u_slope_raw_integration_cost, sigma_eps]
+04:47:53  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_integration_cost, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_slope_integration_cost, u_slope_raw_integration_cost, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.15      31        10.53     0:03:09   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.09      31        10.63     0:03:07   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.09      63        7.66      0:04:21   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.08      63        7.89      0:04:13   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 261 seconds.
+04:52:14  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 261 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+04:52:17  INFO      pymc.stats.convergence — The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:52:17  ERROR     pymc.stats.convergence — The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:52:17  INFO      src.bayesian_model — Computing subsampled LOO …
+04:52:25  INFO      src.bayesian_model — LOO subsample: 20000 / 50000 obs, log_lik array 640.0 MB
+04:52:25  INFO      src.bayesian_model — reff=0.010
+04:52:49  INFO      src.bayesian_model — LOO ELPD=-1057.67 (SE=141.67)
+04:52:49  INFO      src.bayesian_model — Sampling complete.
+04:52:50  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu/results/metrics/06_bayes_full_psycholing.nc
+04:52:59  INFO      src.bayesian_model — Saved posterior plot to /tmp/psycholingu/results/figures/posterior_betas.png
+04:52:59  INFO      src.bayesian_model — Saved forest plot to /tmp/psycholingu/results/figures/forest_plot.png
+04:52:59  INFO      pipeline — Running LOO-CV model comparison …
+04:52:59  INFO      src.bayesian_model — Model comparison:
+                           rank     elpd_loo       p_loo   elpd_diff        weight          se         dse  warning scale
+spillover                     0 -1012.562879   89.197142    0.000000  2.197241e-01  129.868101    0.000000     True   log
+entropy_reduction             1 -1043.795558   89.937581   31.232680  7.692000e-12  129.902077    8.915140     True   log
+full_psycholing               2 -1057.667341  120.260335   45.104462  2.744467e-01  141.668713  191.719764    False   log
+gpt2_controls                 3 -1154.879329  108.183753  142.316451  1.909927e-01  131.499767  183.696201     True   log
+surprisal_vs_entropy_gpt2     4 -1160.265539  107.303923  147.702661  8.642307e-15  131.859108  183.923134     True   log
+deep_gpt2                     5 -1164.106626  107.199719  151.543748  1.317437e-12  131.886898  183.949174     True   log
+controls_only                 6 -1188.945729   83.485106  176.382850  8.385753e-15  134.474160  185.882323     True   log
+surprisal_vs_entropy_t5       7 -1190.872916   83.607870  178.310038  1.279161e-14  134.973941  186.251367     True   log
+deep_t5                       8 -1191.414228   84.253259  178.851350  2.103668e-01  135.029190  186.298686     True   log
+deep_bert                     9 -1209.721476   83.022624  197.158598  8.680212e-13  134.734410  186.094346     True   log
+surprisal_vs_entropy_bert    10 -1210.409422   83.554808  197.846544  7.338150e-13  134.768079  186.119177     True   log
+baseline                     11 -1212.962528   83.183532  200.399650  2.326504e-12  134.754196  186.100716     True   log
+full                         12 -1694.078266  118.408422  681.515387  1.044696e-01  136.119148  188.208480    False   log
+surprisal_vs_ic              13 -1742.884598  116.641203  730.321720  8.959163e-12  136.458196  188.391999    False   log
+04:52:59  INFO      pipeline — Model comparison saved.
+04:52:59  INFO      pipeline — Pipeline complete.
+'/tmp/psycholingu/results/metrics/06_bayes_controls_only.nc' -> 'results/metrics/06_bayes_controls_only.nc'
+'/tmp/psycholingu/results/metrics/06_bayes_entropy_reduction.nc' -> 'results/metrics/06_bayes_entropy_reduction.nc'
+'/tmp/psycholingu/results/metrics/06_bayes_full_psycholing.nc' -> 'results/metrics/06_bayes_full_psycholing.nc'
+'/tmp/psycholingu/results/metrics/06_bayes_gpt2_controls.nc' -> 'results/metrics/06_bayes_gpt2_controls.nc'
+'/tmp/psycholingu/results/metrics/06_bayes_spillover.nc' -> 'results/metrics/06_bayes_spillover.nc'
+'/tmp/psycholingu/results/metrics/06_loo_controls_only.pkl' -> 'results/metrics/06_loo_controls_only.pkl'
+'/tmp/psycholingu/results/metrics/06_loo_entropy_reduction.pkl' -> 'results/metrics/06_loo_entropy_reduction.pkl'
+'/tmp/psycholingu/results/metrics/06_loo_full_psycholing.pkl' -> 'results/metrics/06_loo_full_psycholing.pkl'
+'/tmp/psycholingu/results/metrics/06_loo_gpt2_controls.pkl' -> 'results/metrics/06_loo_gpt2_controls.pkl'
+'/tmp/psycholingu/results/metrics/06_loo_spillover.pkl' -> 'results/metrics/06_loo_spillover.pkl'
+'/tmp/psycholingu/results/metrics/06_summary_controls_only.csv' -> 'results/metrics/06_summary_controls_only.csv'
+'/tmp/psycholingu/results/metrics/06_summary_entropy_reduction.csv' -> 'results/metrics/06_summary_entropy_reduction.csv'
+'/tmp/psycholingu/results/metrics/06_summary_full_psycholing.csv' -> 'results/metrics/06_summary_full_psycholing.csv'
+'/tmp/psycholingu/results/metrics/06_summary_gpt2_controls.csv' -> 'results/metrics/06_summary_gpt2_controls.csv'
+'/tmp/psycholingu/results/metrics/06_summary_spillover.csv' -> 'results/metrics/06_summary_spillover.csv'
+'/tmp/psycholingu/results/metrics/06_model_comparison.csv' -> 'results/metrics/06_model_comparison.csv'
+'/tmp/psycholingu/results/figures/forest_plot.png' -> 'results/figures/forest_plot.png'
+'/tmp/psycholingu/results/figures/posterior_betas.png' -> 'results/figures/posterior_betas.png'
+Time at exit: Sat May  9 04:53:03 AM IST 2026
+NS lexical .nc files now in results/metrics/
+results/metrics/06_bayes_baseline.nc
+results/metrics/06_bayes_controls_only.nc
+results/metrics/06_bayes_deep_bert.nc
+results/metrics/06_bayes_deep_gpt2.nc
+results/metrics/06_bayes_deep_t5.nc
+results/metrics/06_bayes_entropy_reduction.nc
+results/metrics/06_bayes_full.nc
+results/metrics/06_bayes_full_psycholing.nc
+results/metrics/06_bayes_gpt2_controls.nc
+results/metrics/06_bayes_spillover.nc
+results/metrics/06_bayes_surprisal_vs_entropy_bert.nc
+results/metrics/06_bayes_surprisal_vs_entropy_gpt2.nc
+results/metrics/06_bayes_surprisal_vs_entropy_t5.nc
+results/metrics/06_bayes_surprisal_vs_ic.nc

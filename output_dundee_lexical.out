@@ -1,0 +1,217 @@
+==========================================
+SLURM_JOB_ID = 2621089
+SLURM_NODELIST = gnode061
+SLURM_JOB_GPUS = 0
+==========================================
+Time at entrypoint: Sat May  9 05:14:17 AM IST 2026
+Working directory: /home2/ishaan.romil/CP_Project
+05:14:30  INFO      dundee_validation — Running Dundee validation — steps: [6]
+05:14:30  INFO      dundee_validation — Step 1 — Loading Dundee data
+05:14:30  INFO      dundee_validation — Loading cached: /tmp/psycholingu_dundee/processed/01_dundee_reading_times.parquet
+05:14:30  INFO      dundee_validation — Step — Lexical / derived features (length, frequency, spillover, ΔH)
+05:14:30  WARNING   src.lexical_features — SUBTLEX-US file not found at '/tmp/psycholingu/data/raw/SUBTLEX-US.xlsx'. Falling back to corpus frequency. Set paths.subtlex_file in config.yaml for proper frequency norms.
+05:14:30  INFO      src.lexical_features — Lexical controls added: word_length, log_freq, 4 spillover columns, 3 entropy-reduction columns.
+05:14:30  INFO      dundee_validation — Loading cached Dundee model: baseline
+05:14:31  INFO      dundee_validation — Loading cached Dundee model: deep_gpt2
+05:14:31  INFO      dundee_validation — Loading cached Dundee model: deep_bert
+05:14:31  INFO      dundee_validation — Loading cached Dundee model: deep_t5
+05:14:31  INFO      dundee_validation — Loading cached Dundee model: surprisal_vs_ic
+05:14:32  INFO      dundee_validation — Loading cached Dundee model: surprisal_vs_entropy_gpt2
+05:14:32  INFO      dundee_validation — Loading cached Dundee model: surprisal_vs_entropy_bert
+05:14:32  INFO      dundee_validation — Loading cached Dundee model: surprisal_vs_entropy_t5
+05:14:32  INFO      dundee_validation — Loading cached Dundee model: full
+05:14:33  INFO      dundee_validation — Fitting Dundee model: controls_only  predictors=['log_freq', 'word_length']
+05:14:33  INFO      src.bayesian_model — Fitting on 16571 observations after dropping NaN rows.
+05:14:33  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+05:14:34  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+05:14:35  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_eps]
+05:14:35  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.28      15        90.08     0:00:22   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.29      15        96.01     0:00:20   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.33      15        126.67    0:00:15   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.24      31        111.22    0:00:17   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 22 seconds.
+05:14:58  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 22 seconds.
+05:14:58  INFO      src.bayesian_model — Computing subsampled LOO …
+05:15:02  INFO      src.bayesian_model — LOO subsample: 16571 / 16571 obs, log_lik array 530.3 MB
+05:15:02  INFO      src.bayesian_model — reff=0.342
+05:15:16  INFO      src.bayesian_model — LOO ELPD=-18290.28 (SE=76.84)
+05:15:16  INFO      src.bayesian_model — Sampling complete.
+05:15:16  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_controls_only.nc
+05:15:16  INFO      dundee_validation — Fitting Dundee model: gpt2_controls  predictors=['gpt2_surprisal', 'log_freq', 'word_length']
+05:15:16  INFO      src.bayesian_model — Fitting on 11241 observations after dropping NaN rows.
+05:15:16  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+05:15:17  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+05:15:20  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+05:15:20  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.37      15        106.26    0:00:18   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.31      15        103.53    0:00:19   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.28      15        100.38    0:00:19   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.25      15        102.44    0:00:19   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 20 seconds.
+05:15:40  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 20 seconds.
+05:15:40  INFO      src.bayesian_model — Computing subsampled LOO …
+05:15:44  INFO      src.bayesian_model — LOO subsample: 11241 / 11241 obs, log_lik array 359.7 MB
+05:15:44  INFO      src.bayesian_model — reff=0.535
+05:15:53  INFO      src.bayesian_model — LOO ELPD=-12148.51 (SE=64.14)
+05:15:53  INFO      src.bayesian_model — Sampling complete.
+05:15:53  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_gpt2_controls.nc
+05:15:54  INFO      dundee_validation — Fitting Dundee model: spillover  predictors=['gpt2_surprisal', 'gpt2_surprisal_lag1', 'log_freq', 'word_length']
+05:15:54  INFO      src.bayesian_model — Fitting on 9753 observations after dropping NaN rows.
+05:15:54  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+05:15:54  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+05:15:58  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+05:15:58  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.26      15        99.47     0:00:20   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.23      15        76.99     0:00:25   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.27      15        75.33     0:00:26   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.29      15        103.95    0:00:19   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 27 seconds.
+05:16:25  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 27 seconds.
+05:16:25  INFO      src.bayesian_model — Computing subsampled LOO …
+05:16:28  INFO      src.bayesian_model — LOO subsample: 9753 / 9753 obs, log_lik array 312.1 MB
+05:16:28  INFO      src.bayesian_model — reff=0.491
+05:16:36  INFO      src.bayesian_model — LOO ELPD=-10286.84 (SE=59.70)
+05:16:36  INFO      src.bayesian_model — Sampling complete.
+05:16:37  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_spillover.nc
+05:16:37  INFO      dundee_validation — Fitting Dundee model: entropy_reduction  predictors=['gpt2_surprisal', 'gpt2_entropy_reduction', 'log_freq', 'word_length']
+05:16:37  INFO      src.bayesian_model — Fitting on 9753 observations after dropping NaN rows.
+05:16:37  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+05:16:37  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+05:16:39  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+05:16:39  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.28      15        100.35    0:00:19   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.21      15        94.99     0:00:21   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.31      15        93.29     0:00:21   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.27      15        96.66     0:00:20   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 22 seconds.
+05:17:01  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 22 seconds.
+05:17:01  INFO      src.bayesian_model — Computing subsampled LOO …
+05:17:04  INFO      src.bayesian_model — LOO subsample: 9753 / 9753 obs, log_lik array 312.1 MB
+05:17:04  INFO      src.bayesian_model — reff=0.445
+05:17:13  INFO      src.bayesian_model — LOO ELPD=-10296.81 (SE=59.80)
+05:17:13  INFO      src.bayesian_model — Sampling complete.
+05:17:13  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_entropy_reduction.nc
+05:17:13  INFO      dundee_validation — Fitting Dundee model: full_psycholing  predictors=['gpt2_surprisal', 'gpt2_surprisal_lag1', 'integration_cost', 'gpt2_entropy_reduction', 'log_freq', 'word_length']
+05:17:13  INFO      src.bayesian_model — Fitting on 6638 observations after dropping NaN rows.
+05:17:13  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+05:17:14  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+05:17:18  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_integration_cost, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_slope_integration_cost, u_slope_raw_integration_cost, sigma_eps]
+05:17:18  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_integration_cost, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_slope_integration_cost, u_slope_raw_integration_cost, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.21      15        64.49     0:00:30   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.25      31        68.49     0:00:29   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.25      15        98.77     0:00:20   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.21      15        95.81     0:00:20   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 31 seconds.
+05:17:49  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 31 seconds.
+05:17:49  INFO      src.bayesian_model — Computing subsampled LOO …
+05:17:52  INFO      src.bayesian_model — LOO subsample: 6638 / 6638 obs, log_lik array 212.4 MB
+05:17:52  INFO      src.bayesian_model — reff=0.224
+05:17:59  INFO      src.bayesian_model — LOO ELPD=-7000.75 (SE=46.39)
+05:17:59  INFO      src.bayesian_model — Sampling complete.
+05:17:59  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_dundee/metrics/dundee_bayes_full_psycholing.nc
+Traceback (most recent call last):
+  File "/home2/ishaan.romil/CP_Project/scripts/dundee_validation.py", line 528, in <module>
+    main()
+  File "/home2/ishaan.romil/CP_Project/scripts/dundee_validation.py", line 506, in main
+    dundee_idata, _ = run_step6(cfg, df, metrics_dir, figures_dir)
+  File "/home2/ishaan.romil/CP_Project/scripts/dundee_validation.py", line 242, in run_step6
+    comp   = bm_ref.compare_models(loo_results)
+  File "/home2/ishaan.romil/CP_Project/src/bayesian_model.py", line 323, in compare_models
+    comparison = az.compare(loo_results, ic="loo")
+  File "/home2/ishaan.romil/.local/lib/python3.10/site-packages/arviz/stats/stats.py", line 225, in compare
+    rows, cols, ic_i_val = _ic_matrix(ics, ic_i)
+  File "/home2/ishaan.romil/.local/lib/python3.10/site-packages/arviz/stats/stats.py", line 307, in _ic_matrix
+    raise ValueError("The number of observations should be the same across all models")
+ValueError: The number of observations should be the same across all models
+'/tmp/psycholingu_dundee/metrics/dundee_summary_controls_only.csv' -> 'results/dundee_metrics/dundee_summary_controls_only.csv'
+'/tmp/psycholingu_dundee/metrics/dundee_summary_entropy_reduction.csv' -> 'results/dundee_metrics/dundee_summary_entropy_reduction.csv'
+'/tmp/psycholingu_dundee/metrics/dundee_summary_full_psycholing.csv' -> 'results/dundee_metrics/dundee_summary_full_psycholing.csv'
+'/tmp/psycholingu_dundee/metrics/dundee_summary_gpt2_controls.csv' -> 'results/dundee_metrics/dundee_summary_gpt2_controls.csv'
+'/tmp/psycholingu_dundee/metrics/dundee_summary_spillover.csv' -> 'results/dundee_metrics/dundee_summary_spillover.csv'
+'/tmp/psycholingu_dundee/metrics/dundee_bayes_controls_only.nc' -> 'results/dundee_metrics/dundee_bayes_controls_only.nc'
+'/tmp/psycholingu_dundee/metrics/dundee_bayes_entropy_reduction.nc' -> 'results/dundee_metrics/dundee_bayes_entropy_reduction.nc'
+'/tmp/psycholingu_dundee/metrics/dundee_bayes_full_psycholing.nc' -> 'results/dundee_metrics/dundee_bayes_full_psycholing.nc'
+'/tmp/psycholingu_dundee/metrics/dundee_bayes_gpt2_controls.nc' -> 'results/dundee_metrics/dundee_bayes_gpt2_controls.nc'
+'/tmp/psycholingu_dundee/metrics/dundee_bayes_spillover.nc' -> 'results/dundee_metrics/dundee_bayes_spillover.nc'
+'/tmp/psycholingu_dundee/metrics/dundee_loo_controls_only.pkl' -> 'results/dundee_metrics/dundee_loo_controls_only.pkl'
+'/tmp/psycholingu_dundee/metrics/dundee_loo_entropy_reduction.pkl' -> 'results/dundee_metrics/dundee_loo_entropy_reduction.pkl'
+'/tmp/psycholingu_dundee/metrics/dundee_loo_full_psycholing.pkl' -> 'results/dundee_metrics/dundee_loo_full_psycholing.pkl'
+'/tmp/psycholingu_dundee/metrics/dundee_loo_gpt2_controls.pkl' -> 'results/dundee_metrics/dundee_loo_gpt2_controls.pkl'
+'/tmp/psycholingu_dundee/metrics/dundee_loo_spillover.pkl' -> 'results/dundee_metrics/dundee_loo_spillover.pkl'
+Time at exit: Sat May  9 05:18:01 AM IST 2026
+Dundee new variants in results/dundee_metrics/
+results/dundee_metrics/dundee_bayes_baseline.nc
+results/dundee_metrics/dundee_bayes_controls_only.nc
+results/dundee_metrics/dundee_bayes_deep_bert.nc
+results/dundee_metrics/dundee_bayes_deep_gpt2.nc
+results/dundee_metrics/dundee_bayes_deep_t5.nc
+results/dundee_metrics/dundee_bayes_entropy_reduction.nc
+results/dundee_metrics/dundee_bayes_full.nc
+results/dundee_metrics/dundee_bayes_full_psycholing.nc
+results/dundee_metrics/dundee_bayes_gpt2_controls.nc
+results/dundee_metrics/dundee_bayes_spillover.nc
+results/dundee_metrics/dundee_bayes_surprisal_vs_entropy_bert.nc
+results/dundee_metrics/dundee_bayes_surprisal_vs_entropy_gpt2.nc
+results/dundee_metrics/dundee_bayes_surprisal_vs_entropy_t5.nc
+results/dundee_metrics/dundee_bayes_surprisal_vs_ic.nc

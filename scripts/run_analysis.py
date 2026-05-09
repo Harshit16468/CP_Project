@@ -74,14 +74,61 @@ def hyp1_deep_vs_ngram() -> None:
     comp = pd.read_csv(comparison_path, index_col=0)
     logger.info("Model comparison (LOO-CV):\n%s", comp.to_string())
 
-    fig, ax = plt.subplots(figsize=(7, 4))
-    elpd = comp["elpd_loo"]
-    elpd.plot(kind="bar", ax=ax, color="steelblue", edgecolor="white")
-    ax.set_ylabel("ELPD (LOO-CV)")
-    ax.set_title("Hyp 1 & 4: Model Comparison by Architecture")
-    ax.axhline(0, color="gray", linestyle="--", linewidth=0.8)
+    fig, ax = plt.subplots(figsize=(9, max(4, 0.35 * len(comp))))
+    elpd = comp["elpd_loo"].sort_values(ascending=True)
+    colors = ["#27ae60" if v in ("controls_only","gpt2_controls","spillover",
+                                 "entropy_reduction","full_psycholing")
+              else "steelblue" for v in elpd.index]
+    ax.barh(elpd.index, elpd.values, color=colors, edgecolor="white")
+    ax.set_xlabel("ELPD (LOO-CV)  ← worse   better →")
+    ax.set_title(f"Hyp 1 & 4: Model Comparison ({len(comp)} variants)\n"
+                 "green = lexical-controls variants")
+    ax.axvline(0, color="gray", linestyle="--", linewidth=0.8)
     plt.tight_layout()
     fig.savefig(FIGURES_DIR / "hyp1_deep_vs_ngram.png", dpi=150)
+    plt.close(fig)
+
+
+def hyp_lexical_controls() -> None:
+    """
+    Show the impact of psycholinguistic controls (word_length + log_freq)
+    and spillover (lag1 surprisal) on H1.
+    """
+    variants_to_show = [
+        "baseline", "controls_only",
+        "deep_gpt2", "gpt2_controls",
+        "spillover", "entropy_reduction", "full_psycholing",
+    ]
+    comparison_path = RESULTS_DIR / f"{PREFIX}_model_comparison.csv"
+    if not comparison_path.exists():
+        return
+    comp = pd.read_csv(comparison_path, index_col=0)
+    sub = comp[comp.index.isin(variants_to_show)].copy()
+    if sub.empty:
+        return
+    sub = sub.reindex([v for v in variants_to_show if v in sub.index])
+
+    label_map = {
+        "baseline":         "trigram only",
+        "controls_only":    "freq + length",
+        "deep_gpt2":        "GPT-2 surprisal",
+        "gpt2_controls":    "GPT-2 + freq + length",
+        "spillover":        "+ surprisal_{n-1}",
+        "entropy_reduction": "+ entropy reduction",
+        "full_psycholing":  "full (all controls)",
+    }
+    sub.index = [label_map.get(i, i) for i in sub.index]
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.barh(sub.index[::-1], sub["elpd_loo"][::-1],
+            color="#27ae60", edgecolor="white", height=0.6)
+    ax.set_xlabel("ELPD (LOO-CV)  ← worse   better →")
+    ax.set_title("Lexical Controls + Spillover: incremental contribution to fit")
+    ax.axvline(0, color="gray", linestyle="--", linewidth=0.8)
+    plt.tight_layout()
+    out = FIGURES_DIR / "hyp_lexical_controls.png"
+    fig.savefig(out, dpi=150)
+    logger.info("Saved %s", out)
     plt.close(fig)
 
 
@@ -376,7 +423,10 @@ def write_summary_table() -> None:
     for variant in ("baseline", "deep_gpt2", "deep_bert", "deep_t5",
                     "surprisal_vs_ic",
                     "surprisal_vs_entropy_gpt2", "surprisal_vs_entropy_bert",
-                    "surprisal_vs_entropy_t5", "full"):
+                    "surprisal_vs_entropy_t5", "full",
+                    # Psycholinguistic-controls variants
+                    "controls_only", "gpt2_controls", "spillover",
+                    "entropy_reduction", "full_psycholing"):
         idata = load_idata(variant)
         if idata is None:
             continue
@@ -435,6 +485,7 @@ def main() -> None:
     if not args.skip_h5:
         hyp5_attention()           # H5: attention heads ↔ dep length (NS-only)
     hyp6_random_slopes()           # H6: per-reader variance (sigma + slopes)
+    hyp_lexical_controls()         # NEW: lexical-controls incremental ELPD
     write_summary_table()
     logger.info("Analysis complete.")
 

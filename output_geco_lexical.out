@@ -1,0 +1,276 @@
+==========================================
+SLURM_JOB_ID = 2621088
+SLURM_NODELIST = gnode061
+SLURM_JOB_GPUS = 0
+==========================================
+Time at entrypoint: Sat May  9 04:53:03 AM IST 2026
+Working directory: /home2/ishaan.romil/CP_Project
+04:53:23  INFO      geco_validation — Running GECO validation — steps: [6]
+04:53:23  INFO      geco_validation — Step 1 — Loading GECO data
+04:53:23  INFO      geco_validation — Loading cached parquet: /tmp/psycholingu_geco/processed/01_geco_reading_times.parquet
+04:53:24  INFO      geco_validation — Step — Lexical / derived features (length, frequency, spillover, ΔH)
+04:53:24  WARNING   src.lexical_features — SUBTLEX-US file not found at '/tmp/psycholingu/data/raw/SUBTLEX-US.xlsx'. Falling back to corpus frequency. Set paths.subtlex_file in config.yaml for proper frequency norms.
+04:53:25  INFO      src.lexical_features — Lexical controls added: word_length, log_freq, 4 spillover columns, 3 entropy-reduction columns.
+04:53:26  INFO      geco_validation — Loading cached GECO model: baseline
+04:53:26  INFO      geco_validation — Loading cached GECO model: deep_gpt2
+04:53:27  INFO      geco_validation — Loading cached GECO model: deep_bert
+04:53:27  INFO      geco_validation — Loading cached GECO model: deep_t5
+04:53:27  INFO      geco_validation — Loading cached GECO model: surprisal_vs_ic
+04:53:27  INFO      geco_validation — Loading cached GECO model: surprisal_vs_entropy_gpt2
+04:53:28  INFO      geco_validation — Loading cached GECO model: surprisal_vs_entropy_bert
+04:53:28  INFO      geco_validation — Loading cached GECO model: surprisal_vs_entropy_t5
+04:53:28  INFO      geco_validation — Loading cached GECO model: full
+04:53:28  INFO      geco_validation — Fitting GECO model: controls_only  predictors=['log_freq', 'word_length']
+04:53:28  INFO      src.bayesian_model — Fitting on 254028 observations after dropping NaN rows.
+04:53:28  INFO      src.bayesian_model — Subsampled to 50000 observations (max_obs=50000).
+04:53:28  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+04:53:30  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+04:53:33  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_eps]
+04:53:33  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.07      31        21.49     0:01:33   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.06      79        22.41     0:01:29   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.05      63        20.53     0:01:37   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.07      15        22.16     0:01:30   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 98 seconds.
+04:55:10  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 98 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+04:55:11  INFO      pymc.stats.convergence — The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:55:11  ERROR     pymc.stats.convergence — The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+04:55:11  INFO      src.bayesian_model — Computing subsampled LOO …
+04:55:16  INFO      src.bayesian_model — LOO subsample: 20000 / 50000 obs, log_lik array 640.0 MB
+04:55:16  INFO      src.bayesian_model — reff=0.114
+04:55:35  INFO      src.bayesian_model — LOO ELPD=-11764.45 (SE=98.07)
+04:55:35  INFO      src.bayesian_model — Sampling complete.
+04:55:35  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_geco/metrics/geco_bayes_controls_only.nc
+04:55:35  INFO      geco_validation — Fitting GECO model: gpt2_controls  predictors=['gpt2_surprisal', 'log_freq', 'word_length']
+04:55:35  INFO      src.bayesian_model — Fitting on 181027 observations after dropping NaN rows.
+04:55:35  INFO      src.bayesian_model — Subsampled to 50000 observations (max_obs=50000).
+04:55:36  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+04:55:36  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+04:55:39  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+04:55:39  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.07      63        11.98     0:02:46   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.06      63        12.29     0:02:42   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.05      63        12.00     0:02:46   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.09      63        12.55     0:02:39   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 167 seconds.
+04:58:26  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 167 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+04:58:26  INFO      pymc.stats.convergence — The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+04:58:26  INFO      src.bayesian_model — Computing subsampled LOO …
+04:58:33  INFO      src.bayesian_model — LOO subsample: 20000 / 50000 obs, log_lik array 640.0 MB
+04:58:33  INFO      src.bayesian_model — reff=0.108
+04:58:52  INFO      src.bayesian_model — LOO ELPD=-11679.92 (SE=99.24)
+04:58:52  INFO      src.bayesian_model — Sampling complete.
+04:58:53  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_geco/metrics/geco_bayes_gpt2_controls.nc
+04:58:53  INFO      geco_validation — Fitting GECO model: spillover  predictors=['gpt2_surprisal', 'gpt2_surprisal_lag1', 'log_freq', 'word_length']
+04:58:53  INFO      src.bayesian_model — Fitting on 175778 observations after dropping NaN rows.
+04:58:53  INFO      src.bayesian_model — Subsampled to 50000 observations (max_obs=50000).
+04:58:53  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+04:58:54  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+04:58:57  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+04:58:57  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.08      63        9.48      0:03:30   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.07      63        10.38     0:03:12   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.06      63        9.83      0:03:23   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.08      63        9.78      0:03:24   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 211 seconds.
+05:02:28  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 211 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+05:02:28  INFO      pymc.stats.convergence — The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+05:02:28  INFO      src.bayesian_model — Computing subsampled LOO …
+05:02:35  INFO      src.bayesian_model — LOO subsample: 20000 / 50000 obs, log_lik array 640.0 MB
+05:02:35  INFO      src.bayesian_model — reff=0.128
+05:02:54  INFO      src.bayesian_model — LOO ELPD=-11745.77 (SE=98.56)
+05:02:54  INFO      src.bayesian_model — Sampling complete.
+05:02:54  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_geco/metrics/geco_bayes_spillover.nc
+05:02:55  INFO      geco_validation — Fitting GECO model: entropy_reduction  predictors=['gpt2_surprisal', 'gpt2_entropy_reduction', 'log_freq', 'word_length']
+05:02:55  INFO      src.bayesian_model — Fitting on 175778 observations after dropping NaN rows.
+05:02:55  INFO      src.bayesian_model — Subsampled to 50000 observations (max_obs=50000).
+05:02:55  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+05:02:55  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+05:02:57  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+05:02:57  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.07      63        9.86      0:03:22   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.06      63        9.31      0:03:34   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.07      63        9.89      0:03:22   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.09      63        10.51     0:03:10   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 215 seconds.
+05:06:32  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 215 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+05:06:33  INFO      pymc.stats.convergence — The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+05:06:33  INFO      src.bayesian_model — Computing subsampled LOO …
+05:06:39  INFO      src.bayesian_model — LOO subsample: 20000 / 50000 obs, log_lik array 640.0 MB
+05:06:39  INFO      src.bayesian_model — reff=0.110
+05:07:00  INFO      src.bayesian_model — LOO ELPD=-11744.89 (SE=98.57)
+05:07:00  INFO      src.bayesian_model — Sampling complete.
+05:07:00  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_geco/metrics/geco_bayes_entropy_reduction.nc
+05:07:01  INFO      geco_validation — Fitting GECO model: full_psycholing  predictors=['gpt2_surprisal', 'gpt2_surprisal_lag1', 'integration_cost', 'gpt2_entropy_reduction', 'log_freq', 'word_length']
+05:07:01  INFO      src.bayesian_model — Fitting on 175288 observations after dropping NaN rows.
+05:07:01  INFO      src.bayesian_model — Subsampled to 50000 observations (max_obs=50000).
+05:07:01  INFO      src.bayesian_model — Sampling: 1000 draws, 1000 tune, 4 chains (target_accept=0.90, init=jitter+adapt_diag, intercept_prior=data) …
+Initializing NUTS using jitter+adapt_diag...
+05:07:02  INFO      pymc.sampling.mcmc — Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+05:07:06  INFO      pymc.sampling.mcmc — Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_integration_cost, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_slope_integration_cost, u_slope_raw_integration_cost, sigma_eps]
+05:07:06  INFO      pymc.sampling.mcmc — NUTS: [intercept, beta_gpt2_surprisal, beta_gpt2_surprisal_lag1, beta_integration_cost, beta_gpt2_entropy_reduction, beta_log_freq, beta_word_length, sigma_u0, u0_raw, sigma_slope_gpt2_surprisal, u_slope_raw_gpt2_surprisal, sigma_slope_integration_cost, u_slope_raw_integration_cost, sigma_eps]
+                                                                                
+                              Step      Grad      Sampli…                       
+  Progre…   Draws   Diverg…   size      evals     Speed     Elapsed   Remaini…  
+ ────────────────────────────────────────────────────────────────────────────── 
+  ━━━━━━━   2000    0         0.09      63        7.49      0:04:26   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.07      63        7.58      0:04:23   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.07      63        5.11      0:06:31   0:00:00   
+                                                  draws/s                       
+  ━━━━━━━   2000    0         0.06      63        5.08      0:06:33   0:00:00   
+                                                  draws/s                       
+                                                                                
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 394 seconds.
+05:13:40  INFO      pymc.sampling.mcmc — Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 394 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+05:13:40  INFO      pymc.stats.convergence — The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+05:13:40  ERROR     pymc.stats.convergence — The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+05:13:40  INFO      src.bayesian_model — Computing subsampled LOO …
+05:13:49  INFO      src.bayesian_model — LOO subsample: 20000 / 50000 obs, log_lik array 640.0 MB
+05:13:49  INFO      src.bayesian_model — reff=0.087
+05:14:10  INFO      src.bayesian_model — LOO ELPD=-11832.63 (SE=99.58)
+05:14:10  INFO      src.bayesian_model — Sampling complete.
+05:14:10  INFO      src.bayesian_model — Saved InferenceData to /tmp/psycholingu_geco/metrics/geco_bayes_full_psycholing.nc
+05:14:11  INFO      src.bayesian_model — Model comparison:
+                           rank      elpd_loo      p_loo   elpd_diff        weight          se         dse  warning scale
+full                          0 -11524.701194  13.947239    0.000000  2.185153e-01   99.390934    0.000000    False   log
+surprisal_vs_ic               1 -11543.792126  11.785805   19.090932  1.980976e-12   99.238378    4.865543    False   log
+deep_gpt2                     2 -11679.644686   8.479070  154.943492  2.642206e-13   99.249223  140.376282    False   log
+gpt2_controls                 3 -11679.918607   9.348287  155.217414  2.152425e-13   99.244426  140.389710    False   log
+surprisal_vs_entropy_gpt2     4 -11680.315610   8.885920  155.614416  1.809121e-01   99.313889  140.426019    False   log
+entropy_reduction             5 -11744.889437  10.417730  220.188244  1.592986e-01   98.565212  139.278540    False   log
+spillover                     6 -11745.772687  10.341758  221.071494  2.411733e-13   98.561787  139.273514    False   log
+controls_only                 7 -11764.454746   8.312140  239.753552  1.457897e-01   98.065809  139.976111    False   log
+baseline                      8 -11764.995220   7.928218  240.294026  4.302693e-14   98.085904  139.983881    False   log
+full_psycholing               9 -11832.627011  13.742478  307.925818  1.516709e-01   99.582114  141.160555    False   log
+surprisal_vs_entropy_t5      10 -11867.205018   8.444142  342.503825  1.438134e-01  100.120598  140.488643    False   log
+deep_t5                      11 -11867.307499   8.004072  342.606305  0.000000e+00  100.103298  140.463994    False   log
+deep_bert                    12 -11869.052517   8.054944  344.351323  2.808312e-15  100.078814  140.443160    False   log
+surprisal_vs_entropy_bert    13 -11869.512386   8.398465  344.811193  1.256935e-13  100.049088  140.419045    False   log
+05:14:11  INFO      geco_validation — GECO model comparison saved.
+05:14:11  INFO      geco_validation — Generating cross-dataset comparison plots …
+05:14:11  INFO      geco_validation — Saved /tmp/psycholingu_geco/figures/geco_vs_ns_elpd.png
+05:14:12  INFO      geco_validation — Saved /tmp/psycholingu_geco/figures/geco_vs_ns_betas.png
+05:14:13  INFO      geco_validation — Saved /tmp/psycholingu_geco/figures/geco_h2_ic_replication.png
+05:14:14  INFO      geco_validation — Cross-dataset comparison table saved to /tmp/psycholingu_geco/metrics/cross_dataset_comparison.csv
+05:14:14  INFO      geco_validation — GECO validation complete.  Outputs: /tmp/psycholingu_geco
+
+── Cross-dataset coefficient comparison ──────────────
+         corpus                   variant                   predictor    mean  hdi_2.5  hdi_97.5   sig
+Natural Stories           surprisal_vs_ic              gpt2_surprisal  0.0144   0.0113    0.0176  True
+Natural Stories           surprisal_vs_ic            integration_cost -0.0006  -0.0030    0.0017 False
+           GECO           surprisal_vs_ic              gpt2_surprisal -0.0034  -0.0081    0.0019 False
+           GECO           surprisal_vs_ic            integration_cost  0.0026  -0.0015    0.0069 False
+Natural Stories surprisal_vs_entropy_gpt2              gpt2_surprisal  0.0079   0.0049    0.0109  True
+Natural Stories surprisal_vs_entropy_gpt2                gpt2_entropy  0.0051   0.0027    0.0076  True
+           GECO surprisal_vs_entropy_gpt2              gpt2_surprisal -0.0006  -0.0049    0.0037 False
+           GECO surprisal_vs_entropy_gpt2                gpt2_entropy -0.0068  -0.0108   -0.0027  True
+Natural Stories                      full             ngram_surprisal  0.0008  -0.0015    0.0031 False
+Natural Stories                      full              gpt2_surprisal  0.0098   0.0065    0.0131  True
+Natural Stories                      full bert_base_uncased_surprisal  0.0061   0.0032    0.0091  True
+Natural Stories                      full           t5_base_surprisal  0.0181   0.0155    0.0207  True
+Natural Stories                      full                gpt2_entropy -0.0013  -0.0040    0.0015 False
+Natural Stories                      full   bert_base_uncased_entropy -0.0017  -0.0046    0.0013 False
+Natural Stories                      full             t5_base_entropy  0.0020  -0.0003    0.0043 False
+Natural Stories                      full            integration_cost -0.0013  -0.0037    0.0011 False
+           GECO                      full             ngram_surprisal -0.0016  -0.0054    0.0022 False
+           GECO                      full              gpt2_surprisal -0.0019  -0.0069    0.0033 False
+           GECO                      full bert_base_uncased_surprisal  0.0005  -0.0040    0.0049 False
+           GECO                      full           t5_base_surprisal -0.0154  -0.0193   -0.0114  True
+           GECO                      full                gpt2_entropy -0.0050  -0.0091   -0.0009  True
+           GECO                      full   bert_base_uncased_entropy  0.0040  -0.0003    0.0084 False
+           GECO                      full             t5_base_entropy -0.0057  -0.0095   -0.0020  True
+           GECO                      full            integration_cost  0.0024  -0.0018    0.0064 False
+
+Outputs saved to: /tmp/psycholingu_geco
+  Figures : /tmp/psycholingu_geco/figures
+  Metrics : /tmp/psycholingu_geco/metrics
+'/tmp/psycholingu_geco/metrics/geco_summary_controls_only.csv' -> 'results/geco_metrics/geco_summary_controls_only.csv'
+'/tmp/psycholingu_geco/metrics/geco_summary_entropy_reduction.csv' -> 'results/geco_metrics/geco_summary_entropy_reduction.csv'
+'/tmp/psycholingu_geco/metrics/geco_summary_full_psycholing.csv' -> 'results/geco_metrics/geco_summary_full_psycholing.csv'
+'/tmp/psycholingu_geco/metrics/geco_summary_gpt2_controls.csv' -> 'results/geco_metrics/geco_summary_gpt2_controls.csv'
+'/tmp/psycholingu_geco/metrics/geco_summary_spillover.csv' -> 'results/geco_metrics/geco_summary_spillover.csv'
+'/tmp/psycholingu_geco/metrics/geco_bayes_controls_only.nc' -> 'results/geco_metrics/geco_bayes_controls_only.nc'
+'/tmp/psycholingu_geco/metrics/geco_bayes_entropy_reduction.nc' -> 'results/geco_metrics/geco_bayes_entropy_reduction.nc'
+'/tmp/psycholingu_geco/metrics/geco_bayes_full_psycholing.nc' -> 'results/geco_metrics/geco_bayes_full_psycholing.nc'
+'/tmp/psycholingu_geco/metrics/geco_bayes_gpt2_controls.nc' -> 'results/geco_metrics/geco_bayes_gpt2_controls.nc'
+'/tmp/psycholingu_geco/metrics/geco_bayes_spillover.nc' -> 'results/geco_metrics/geco_bayes_spillover.nc'
+'/tmp/psycholingu_geco/metrics/geco_loo_controls_only.pkl' -> 'results/geco_metrics/geco_loo_controls_only.pkl'
+'/tmp/psycholingu_geco/metrics/geco_loo_entropy_reduction.pkl' -> 'results/geco_metrics/geco_loo_entropy_reduction.pkl'
+'/tmp/psycholingu_geco/metrics/geco_loo_full_psycholing.pkl' -> 'results/geco_metrics/geco_loo_full_psycholing.pkl'
+'/tmp/psycholingu_geco/metrics/geco_loo_gpt2_controls.pkl' -> 'results/geco_metrics/geco_loo_gpt2_controls.pkl'
+'/tmp/psycholingu_geco/metrics/geco_loo_spillover.pkl' -> 'results/geco_metrics/geco_loo_spillover.pkl'
+Time at exit: Sat May  9 05:14:16 AM IST 2026
+GECO new variants in results/geco_metrics/
+results/geco_metrics/geco_bayes_baseline.nc
+results/geco_metrics/geco_bayes_controls_only.nc
+results/geco_metrics/geco_bayes_deep_bert.nc
+results/geco_metrics/geco_bayes_deep_gpt2.nc
+results/geco_metrics/geco_bayes_deep_t5.nc
+results/geco_metrics/geco_bayes_entropy_reduction.nc
+results/geco_metrics/geco_bayes_full.nc
+results/geco_metrics/geco_bayes_full_psycholing.nc
+results/geco_metrics/geco_bayes_gpt2_controls.nc
+results/geco_metrics/geco_bayes_spillover.nc
+results/geco_metrics/geco_bayes_surprisal_vs_entropy_bert.nc
+results/geco_metrics/geco_bayes_surprisal_vs_entropy_gpt2.nc
+results/geco_metrics/geco_bayes_surprisal_vs_entropy_t5.nc
+results/geco_metrics/geco_bayes_surprisal_vs_ic.nc
