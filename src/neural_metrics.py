@@ -55,9 +55,12 @@ class NeuralMetricsExtractor:
 
     Parameters
     ----------
-    model_name : HuggingFace model identifier (e.g. ``"gpt2"``)
-    model_type : ``"causal"`` | ``"masked"`` | ``"seq2seq"``
-    device     : ``"cpu"`` | ``"cuda"`` | ``"auto"``
+    model_name        : HuggingFace model identifier (e.g. ``"gpt2"``)
+    model_type        : ``"causal"`` | ``"masked"`` | ``"seq2seq"``
+    device            : ``"cpu"`` | ``"cuda"`` | ``"auto"``
+    use_half_precision: load model in float16 to halve VRAM usage (LLaMA 3 etc.)
+    column_prefix     : override the DataFrame column prefix
+                        (default: derived from model_name)
     """
 
     def __init__(
@@ -65,18 +68,25 @@ class NeuralMetricsExtractor:
         model_name: str,
         model_type: ModelType,
         device: str = "auto",
+        use_half_precision: bool = False,
+        column_prefix: str | None = None,
     ) -> None:
-        self.model_name = model_name
-        self.model_type = model_type
-        self.device = _resolve_device(device)
+        self.model_name         = model_name
+        self.model_type         = model_type
+        self.device             = _resolve_device(device)
+        self.use_half_precision = use_half_precision
+        self._column_prefix     = column_prefix  # None → auto-derived
 
-        logger.info("Loading %s (%s) on %s …", model_name, model_type, self.device)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self._model = _load_model(model_name, model_type)
+        logger.info("Loading %s (%s) on %s (fp16=%s) …",
+                    model_name, model_type, self.device, use_half_precision)
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            model_name, trust_remote_code=True
+        )
+        self._model = _load_model(model_name, model_type, use_half_precision)
         self._model.to(self.device)
         self._model.eval()
 
-        # GPT-2 has no pad token by default
+        # Models with no explicit pad token (GPT-2, LLaMA 3, …)
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
 
@@ -113,7 +123,10 @@ class NeuralMetricsExtractor:
         Groups by (story_id, sentence_id) → calls sentence_metrics once per
         unique sentence, then aligns back by word_position.
         """
-        prefix = self.model_name.replace("-", "_").replace("/", "_")
+        if self._column_prefix is not None:
+            prefix = self._column_prefix
+        else:
+            prefix = self.model_name.replace("-", "_").replace("/", "_")
         surp_col = f"{prefix}_surprisal"
         entr_col = f"{prefix}_entropy"
 
@@ -210,7 +223,11 @@ class NeuralMetricsExtractor:
     def _causal_metrics(self, sentence: str) -> list[dict]:
         """GPT-2 style left-to-right surprisal."""
         words  = sentence.split()
-        max_len = getattr(self._model.config, "n_positions", 1024)
+        # LLaMA 3 uses max_position_embeddings (8192); GPT-2 uses n_positions (1024)
+        max_len = getattr(
+            self._model.config, "max_position_embeddings",
+            getattr(self._model.config, "n_positions", 1024),
+        )
         inputs = self.tokenizer(
             sentence, return_tensors="pt",
             truncation=True, max_length=max_len,
@@ -372,12 +389,15 @@ def _resolve_device(device: str) -> str:
     return device
 
 
-def _load_model(name: str, model_type: ModelType):
+def _load_model(name: str, model_type: ModelType, use_half_precision: bool = False):
+    kwargs: dict = {"low_cpu_mem_usage": True}
+    if use_half_precision:
+        kwargs["torch_dtype"] = torch.float16
     if model_type == "causal":
-        return AutoModelForCausalLM.from_pretrained(name)
+        return AutoModelForCausalLM.from_pretrained(name, **kwargs)
     elif model_type == "masked":
-        return AutoModelForMaskedLM.from_pretrained(name)
+        return AutoModelForMaskedLM.from_pretrained(name, **kwargs)
     elif model_type == "seq2seq":
-        return AutoModelForSeq2SeqLM.from_pretrained(name)
+        return AutoModelForSeq2SeqLM.from_pretrained(name, **kwargs)
     else:
         raise ValueError(f"Unknown model_type: {model_type!r}")

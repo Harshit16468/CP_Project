@@ -41,6 +41,12 @@ models:
     type: seq2seq
     batch_size: 8
     device: auto
+  llama3:
+    name: meta-llama/Meta-Llama-3-8B
+    type: causal
+    column_prefix: llama3
+    device: auto
+    use_half_precision: true
 attention:
   models:
   - gpt2
@@ -57,16 +63,20 @@ bayesian:
   - gpt2_surprisal
   - bert_base_uncased_surprisal
   - t5_base_surprisal
+  - llama3_surprisal
   - gpt2_entropy
   - bert_base_uncased_entropy
   - t5_base_entropy
+  - llama3_entropy
   - integration_cost
   - log_freq
   - word_length
   - gpt2_surprisal_lag1
+  - llama3_surprisal_lag1
   - gpt2_entropy_reduction
   random_slopes:
   - gpt2_surprisal
+  - llama3_surprisal
   - integration_cost
   rt_transform: log
   outlier_sd_cutoff: 3.0

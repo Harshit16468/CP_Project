@@ -136,14 +136,25 @@ def step3_neural(cfg: dict, df: pd.DataFrame) -> pd.DataFrame:
         return pd.read_parquet(cache)
 
     model_cfgs = [
-        ("gpt2",        cfg["models"]["gpt2"]["name"],  "causal",  cfg["models"]["gpt2"]["device"]),
-        ("bert",        cfg["models"]["bert"]["name"],  "masked",  cfg["models"]["bert"]["device"]),
-        ("t5",          cfg["models"]["t5"]["name"],    "seq2seq", cfg["models"]["t5"]["device"]),
+        ("gpt2", cfg["models"]["gpt2"]["name"], "causal",  cfg["models"]["gpt2"]["device"], False, None),
+        ("bert", cfg["models"]["bert"]["name"], "masked",  cfg["models"]["bert"]["device"], False, None),
+        ("t5",   cfg["models"]["t5"]["name"],   "seq2seq", cfg["models"]["t5"]["device"],   False, None),
     ]
+    # Append LLaMA 3 if configured — it's optional so pipeline still runs without it
+    if "llama3" in cfg.get("models", {}):
+        lc = cfg["models"]["llama3"]
+        model_cfgs.append((
+            "llama3", lc["name"], lc.get("type", "causal"), lc.get("device", "auto"),
+            lc.get("use_half_precision", False), lc.get("column_prefix", "llama3"),
+        ))
 
-    for label, name, mtype, device in model_cfgs:
+    for label, name, mtype, device, fp16, col_prefix in model_cfgs:
         logger.info("Processing model: %s (%s)", name, mtype)
-        extractor = NeuralMetricsExtractor(name, mtype, device)
+        extractor = NeuralMetricsExtractor(
+            name, mtype, device,
+            use_half_precision=fp16,
+            column_prefix=col_prefix,
+        )
         df        = extractor.compute_metrics(df)
         del extractor   # free GPU memory between models
 
@@ -317,6 +328,28 @@ def step6_bayesian(cfg: dict, df: pd.DataFrame) -> None:
                 "log_freq", "word_length",
             ],
             "random_slopes": ["gpt2_surprisal", "integration_cost"],
+        },
+        # ── LLaMA 3 8B variants (scale-invariance replication) ────────────────
+        "deep_llama": {
+            **bay_cfg,
+            "predictors": ["llama3_surprisal"],
+            "random_slopes": ["llama3_surprisal"],
+        },
+        "surprisal_vs_ic_llama": {
+            **bay_cfg,
+            "predictors": ["llama3_surprisal", "integration_cost"],
+            "random_slopes": ["llama3_surprisal", "integration_cost"],
+        },
+        "surprisal_vs_entropy_llama": {
+            **bay_cfg,
+            "predictors": ["llama3_surprisal", "llama3_entropy"],
+            "random_slopes": ["llama3_surprisal"],
+        },
+        "spillover_llama": {
+            **bay_cfg,
+            "predictors": ["llama3_surprisal", "llama3_surprisal_lag1",
+                           "log_freq", "word_length"],
+            "random_slopes": ["llama3_surprisal"],
         },
     }
 

@@ -100,6 +100,12 @@ DUNDEE_VARIANTS = {
     "full_psycholing":            ["gpt2_surprisal", "gpt2_surprisal_lag1",
                                    "integration_cost", "gpt2_entropy_reduction",
                                    "log_freq", "word_length"],
+    # ── LLaMA 3 8B scale-invariance variants ──────────────────────────────────
+    "deep_llama":                 ["llama3_surprisal"],
+    "surprisal_vs_ic_llama":      ["llama3_surprisal", "integration_cost"],
+    "surprisal_vs_entropy_llama": ["llama3_surprisal", "llama3_entropy"],
+    "spillover_llama":            ["llama3_surprisal", "llama3_surprisal_lag1",
+                                   "log_freq", "word_length"],
 }
 
 
@@ -163,14 +169,25 @@ def run_step3(cfg: dict, df: pd.DataFrame, proc_dir: Path) -> pd.DataFrame:
     p = proc_dir / "03_dundee_neural_metrics.parquet"
     if p.exists():
         return pd.read_parquet(p)
-    for label, name, mtype, device in [
-        ("gpt2", cfg["models"]["gpt2"]["name"], "causal",  cfg["models"]["gpt2"]["device"]),
-        ("bert", cfg["models"]["bert"]["name"], "masked",  cfg["models"]["bert"]["device"]),
-        ("t5",   cfg["models"]["t5"]["name"],   "seq2seq", cfg["models"]["t5"]["device"]),
-    ]:
+    model_cfgs = [
+        ("gpt2", cfg["models"]["gpt2"]["name"], "causal",  cfg["models"]["gpt2"]["device"], False, None),
+        ("bert", cfg["models"]["bert"]["name"], "masked",  cfg["models"]["bert"]["device"], False, None),
+        ("t5",   cfg["models"]["t5"]["name"],   "seq2seq", cfg["models"]["t5"]["device"],   False, None),
+    ]
+    if "llama3" in cfg.get("models", {}):
+        lc = cfg["models"]["llama3"]
+        model_cfgs.append((
+            "llama3", lc["name"], lc.get("type", "causal"), lc.get("device", "auto"),
+            lc.get("use_half_precision", False), lc.get("column_prefix", "llama3"),
+        ))
+    for label, name, mtype, device, fp16, col_prefix in model_cfgs:
         logger.info("  model: %s", name)
-        extractor = NeuralMetricsExtractor(name, mtype, device)
-        df        = extractor.compute_metrics(df)
+        extractor = NeuralMetricsExtractor(
+            name, mtype, device,
+            use_half_precision=fp16,
+            column_prefix=col_prefix,
+        )
+        df = extractor.compute_metrics(df)
         del extractor
     df.to_parquet(p, index=True)
     return df

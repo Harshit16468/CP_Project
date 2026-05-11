@@ -29,6 +29,7 @@ SPILLOVER_COLS = [
     "gpt2_surprisal",
     "bert_base_uncased_surprisal",
     "t5_base_surprisal",
+    "llama3_surprisal",
     "ngram_surprisal",
 ]
 
@@ -37,6 +38,7 @@ ENTROPY_COLS = [
     "gpt2_entropy",
     "bert_base_uncased_entropy",
     "t5_base_entropy",
+    "llama3_entropy",
 ]
 
 
